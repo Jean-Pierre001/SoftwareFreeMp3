@@ -8,6 +8,7 @@ const ffmpegPath = require("ffmpeg-static");
 const app = express();
 
 const FFMPEG_PATH = ffmpegPath;
+const COOKIES_PATH = path.join(__dirname, "cookies.txt");
 
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
 
@@ -40,11 +41,16 @@ app.post("/api/download", (req, res) => {
         "-x",
         "--audio-format",
         "mp3",
+        "--cookies",
+        COOKIES_PATH,
         "--ffmpeg-location",
         FFMPEG_PATH,
         "--no-playlist",
         "-o",
-        path.join(DOWNLOADS_PATH, `[${downloadId}]-%(title)s.%(ext)s`),
+        path.join(
+            DOWNLOADS_PATH,
+            `[${downloadId}]-%(title)s.%(ext)s`
+        ),
         url
     ];
 
