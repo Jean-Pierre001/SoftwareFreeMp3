@@ -10,7 +10,6 @@ const YTDLP_PATH =
         ? path.join(__dirname, "bin", "yt-dlp.exe")
         : path.join(__dirname, "bin", "yt-dlp");
 const FFMPEG_PATH = ffmpegPath;
-const COOKIES_PATH = path.join(__dirname, "cookies.txt");
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
 
 if (!fs.existsSync(YTDLP_PATH)) {
@@ -27,14 +26,6 @@ if (!fs.existsSync(FFMPEG_PATH)) {
     process.exit(1);
 } else {
     console.log("Ruta de ffmpeg.exe:", FFMPEG_PATH);
-}
-
-if (!fs.existsSync(COOKIES_PATH)) {
-    console.error("Archivo cookies.txt no encontrado. Por favor, crea uno en la raíz del proyecto.");
-    console.log("COOKIES_PATH:", COOKIES_PATH);
-    process.exit(1);
-} else {
-    console.log("Ruta de cookies.txt:", COOKIES_PATH);
 }
 
 if (!fs.existsSync(DOWNLOADS_PATH)) {
@@ -70,7 +61,7 @@ app.post("/api/download", (req, res) => {
         "--extract-audio",
         "--audio-format", "mp3",
 
-        "--cookies-from-browser",
+        "--cookies-from-browser", "chrome",
 
         // Runtime JavaScript para resolver desafíos de YouTube
         "--js-runtimes", "node",
