@@ -1,16 +1,25 @@
 const express = require("express");
 const { spawn } = require("child_process");
-const ytdlp = require("yt-dlp-exec");
 const path = require("path");
 const fs = require("fs");
 const ffmpegPath = require("ffmpeg-static");
 
 const app = express();
 
+const YTDLP_PATH = path.join(__dirname, "bin", "yt-dlp.exe");
 const FFMPEG_PATH = ffmpegPath;
 const COOKIES_PATH = path.join(__dirname, "cookies.txt");
-
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
+
+if (!fs.existsSync(YTDLP_PATH)) {
+    console.error("Archivo yt-dlp.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
+    process.exit(1);
+}
+
+if (!fs.existsSync(FFMPEG_PATH)) {
+    console.error("Archivo ffmpeg.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
+    process.exit(1);
+}
 
 if (!fs.existsSync(COOKIES_PATH)) {
     console.error("Archivo cookies.txt no encontrado. Por favor, crea uno en la raíz del proyecto.");
@@ -35,51 +44,43 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Endpoint para iniciar la descarga de un tema
+// Endpoint para iniciar la descarga de un tema usando el binario nativo
 app.post("/api/download", (req, res) => {
     const { url } = req.body; 
     if (!url) return res.status(400).json({ error: "Falta la URL." });
 
     const downloadId = Date.now().toString();
+    const outputPath = path.join(DOWNLOADS_PATH, `[${downloadId}]-%(title)s.%(ext)s`);
 
-    const process = ytdlp.exec(url, {
-        extractAudio: true,
-        audioFormat: "mp3",
+    // Mapeo directo de configuraciones a argumentos de CLI para yt-dlp
+    const args = [
+        url,
+        "--extract-audio",
+        "--audio-format", "mp3",
+        "--cookies", COOKIES_PATH,
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+        "--referer", "https://www.youtube.com/",
+        "--add-header", "Accept-Language: es-ES,es;q=0.9",
+        "--ffmpeg-location", FFMPEG_PATH,
+        "--no-playlist",
+        "--force-ipv4",
+        "--retries", "10",
+        "--fragment-retries", "10",
+        "--output", outputPath
+    ];
 
-        cookies: COOKIES_PATH,
-
-        userAgent:
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-
-        referer: "https://www.youtube.com/",
-
-        addHeader: [
-            "Accept-Language: es-ES,es;q=0.9"
-        ],
-
-        ffmpegLocation: FFMPEG_PATH,
-        noPlaylist: true,
-
-        forceIpv4: true,
-
-        retries: 10,
-        fragmentRetries: 10,
-
-        output: path.join(
-            DOWNLOADS_PATH,
-            `[${downloadId}]-%(title)s.%(ext)s`
-        )
-    });
+    // Llamada directa al binario "yt-dlp" instalado en el sistema
+    const ytDlpProcess = spawn(YTDLP_PATH, args);
     
     activeDownloads.set(downloadId, {
-        process,
-        logs: ["Iniciando descarga..."],
+        process: ytDlpProcess,
+        logs: ["Iniciando descarga con binario local..."],
         status: "downloading"
     });
 
     console.log(`[INFO] Descarga ${downloadId} iniciada para: ${url}`);
 
-    process.stdout.on("data", (data) => {
+    ytDlpProcess.stdout.on("data", (data) => {
         const line = cleanLog(data);
         if (!line) return;
         
@@ -90,14 +91,16 @@ app.post("/api/download", (req, res) => {
         }
     });
 
-    process.stderr.on("data", (data) => {
+    ytDlpProcess.stderr.on("data", (data) => {
         const line = cleanLog(data);
+        if (!line) return;
+
         console.error(`[ERROR yt-dlp ${downloadId}]: ${line}`);
         const state = activeDownloads.get(downloadId);
         if (state) state.logs.push(`[ERR] ${line}`);
     });
 
-    process.on("close", (code) => {
+    ytDlpProcess.on("close", (code) => {
         console.log(`[INFO] Proceso ${downloadId} finalizado con código ${code}`);
         const state = activeDownloads.get(downloadId);
         if (!state) return;
@@ -190,7 +193,6 @@ app.get("/api/get-file/:id", (req, res) => {
     }
 });
 
-// Escuchar en el puerto que te da Render
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en el puerto ${PORT}`);
