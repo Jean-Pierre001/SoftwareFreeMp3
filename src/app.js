@@ -6,7 +6,8 @@ const ffmpegPath = require("ffmpeg-static");
 
 const app = express();
 
-const YTDLP_PATH = path.join("bin", "yt-dlp.exe");
+// '..' le dice a Node que salga un nivel hacia atrás de la carpeta del servidor
+const YTDLP_PATH = path.join(__dirname, "..", "bin", "yt-dlp.exe");
 const FFMPEG_PATH = ffmpegPath;
 const COOKIES_PATH = path.join(__dirname, "cookies.txt");
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
@@ -14,7 +15,7 @@ const DOWNLOADS_PATH = path.join(__dirname, "downloads");
 if (!fs.existsSync(YTDLP_PATH)) {
     console.error("Archivo yt-dlp.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
     console.log("YTDLP_PATH:", YTDLP_PATH);
-    process.exit(1);
+    process.exit(1);    
 }
 
 if (!fs.existsSync(FFMPEG_PATH)) {
