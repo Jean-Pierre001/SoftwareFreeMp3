@@ -1,14 +1,11 @@
 const express = require("express");
 const { spawn } = require("child_process");
+const ytdlp = require("yt-dlp-exec");
 const path = require("path");
 const fs = require("fs");
 const ffmpegPath = require("ffmpeg-static");
 
 const app = express();
-const isProduction = process.env.NODE_ENV === "production" || process.platform !== "win32";
-const YTDLP_PATH = isProduction 
-    ? path.join(__dirname, "bin", "yt-dlp") 
-    : path.join(__dirname, "bin", "yt-dlp.exe");
 
 const FFMPEG_PATH = ffmpegPath;
 
@@ -51,7 +48,16 @@ app.post("/api/download", (req, res) => {
         url
     ];
 
-    const process = spawn(YTDLP_PATH, args);
+    const process = ytdlp.exec(url, {
+        extractAudio: true,
+        audioFormat: "mp3",
+        ffmpegLocation: FFMPEG_PATH,
+        noPlaylist: true,
+        output: path.join(
+            DOWNLOADS_PATH,
+            `[${downloadId}]-%(title)s.%(ext)s`
+        )
+    });
     
     activeDownloads.set(downloadId, {
         process,
