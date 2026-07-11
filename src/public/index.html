@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargar Audio · Single</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+
+    <header>
+        <div class="brand">Software<span>FreeMp3</span></div>
+    </header>
+
+    <main class="container">
+        <div class="intro">
+            <h1>Descargar audio de YouTube</h1>
+            <p>Pegá el enlace del video y obtené el MP3.</p>
+        </div>
+
+        <form class="form-group" id="downloadForm">
+            <div class="field">
+                <label for="urlInput">URL del video</label>
+                <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" required>
+            </div>
+            <button type="submit" id="startBtn">
+                <span class="btn-label">Descargar MP3</span>
+            </button>
+        </form>
+
+        <div class="progress-line" id="progressLine"></div>
+
+        <div class="result" id="result">
+            <div id="status" class="status-badge">
+                <span class="status-dot"></span>
+                <span class="status-text"></span>
+            </div>
+            <div id="logBox" class="log-container"></div>
+        </div>
+    </main>
+
+    <script src="/js/index.js"></script>
+</body>
+</html>
