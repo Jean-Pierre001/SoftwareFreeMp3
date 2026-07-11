@@ -5,9 +5,10 @@ const fs = require("fs");
 const ffmpegPath = require("ffmpeg-static");
 
 const app = express();
-
-// '..' le dice a Node que salga un nivel hacia atrás de la carpeta del servidor
-const YTDLP_PATH = path.join(__dirname, "..", "bin", "yt-dlp.exe");
+const YTDLP_PATH =
+    process.platform === "win32"
+        ? path.join(__dirname, "bin", "yt-dlp.exe")
+        : path.join(__dirname, "bin", "yt-dlp");
 const FFMPEG_PATH = ffmpegPath;
 const COOKIES_PATH = path.join(__dirname, "cookies.txt");
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
@@ -16,17 +17,24 @@ if (!fs.existsSync(YTDLP_PATH)) {
     console.error("Archivo yt-dlp.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
     console.log("YTDLP_PATH:", YTDLP_PATH);
     process.exit(1);    
+} else {
+    console.log("Ruta de yt-dlp.exe:", YTDLP_PATH);
 }
 
 if (!fs.existsSync(FFMPEG_PATH)) {
     console.error("Archivo ffmpeg.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
     console.log("FFMPEG_PATH:", FFMPEG_PATH);
     process.exit(1);
+} else {
+    console.log("Ruta de ffmpeg.exe:", FFMPEG_PATH);
 }
 
 if (!fs.existsSync(COOKIES_PATH)) {
     console.error("Archivo cookies.txt no encontrado. Por favor, crea uno en la raíz del proyecto.");
+    console.log("COOKIES_PATH:", COOKIES_PATH);
     process.exit(1);
+} else {
+    console.log("Ruta de cookies.txt:", COOKIES_PATH);
 }
 
 if (!fs.existsSync(DOWNLOADS_PATH)) {
