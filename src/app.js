@@ -61,8 +61,6 @@ app.post("/api/download", (req, res) => {
         "--extract-audio",
         "--audio-format", "mp3",
 
-        "--cookies-from-browser", "chrome",
-
         // Runtime JavaScript para resolver desafíos de YouTube
         "--js-runtimes", "node",
 
