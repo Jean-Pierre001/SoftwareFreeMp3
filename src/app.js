@@ -82,6 +82,17 @@ app.post("/api/download", (req, res) => {
 
     // Llamada directa al binario "yt-dlp" instalado en el sistema
     const ytDlpProcess = spawn(YTDLP_PATH, args);
+
+    ytDlpProcess.on("error", (err) => {
+        console.error(err);
+
+        const state = activeDownloads.get(downloadId);
+
+        if (state) {
+            state.status = "failed";
+            state.logs.push(err.message);
+        }
+    });
     
     activeDownloads.set(downloadId, {
         process: ytDlpProcess,
