@@ -12,6 +12,11 @@ const COOKIES_PATH = path.join(__dirname, "cookies.txt");
 
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
 
+if (!fs.existsSync(COOKIES_PATH)) {
+    console.error("Archivo cookies.txt no encontrado. Por favor, crea uno en la raíz del proyecto.");
+    process.exit(1);
+}
+
 if (!fs.existsSync(DOWNLOADS_PATH)) {
     fs.mkdirSync(DOWNLOADS_PATH);
 }
@@ -36,29 +41,30 @@ app.post("/api/download", (req, res) => {
     if (!url) return res.status(400).json({ error: "Falta la URL." });
 
     const downloadId = Date.now().toString();
-    
-    const args = [
-        "-x",
-        "--audio-format",
-        "mp3",
-        "--cookies",
-        COOKIES_PATH,
-        "--ffmpeg-location",
-        FFMPEG_PATH,
-        "--no-playlist",
-        "-o",
-        path.join(
-            DOWNLOADS_PATH,
-            `[${downloadId}]-%(title)s.%(ext)s`
-        ),
-        url
-    ];
 
     const process = ytdlp.exec(url, {
         extractAudio: true,
         audioFormat: "mp3",
+
+        cookies: COOKIES_PATH,
+
+        userAgent:
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+
+        referer: "https://www.youtube.com/",
+
+        addHeader: [
+            "Accept-Language: es-ES,es;q=0.9"
+        ],
+
         ffmpegLocation: FFMPEG_PATH,
         noPlaylist: true,
+
+        forceIpv4: true,
+
+        retries: 10,
+        fragmentRetries: 10,
+
         output: path.join(
             DOWNLOADS_PATH,
             `[${downloadId}]-%(title)s.%(ext)s`
@@ -71,7 +77,7 @@ app.post("/api/download", (req, res) => {
         status: "downloading"
     });
 
-    console.log(`[INFO] Descarga individual ${downloadId} iniciada para: ${url}`);
+    console.log(`[INFO] Descarga ${downloadId} iniciada para: ${url}`);
 
     process.stdout.on("data", (data) => {
         const line = cleanLog(data);
