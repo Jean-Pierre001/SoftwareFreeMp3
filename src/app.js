@@ -2,19 +2,15 @@ const express = require("express");
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const ffmpegPath = require("ffmpeg-static");
 
 const app = express();
-
-// Detectamos si estamos en producción (Linux/Render) o local (Windows)
 const isProduction = process.env.NODE_ENV === "production" || process.platform !== "win32";
-
-// Si es Linux, usamos el yt-dlp que descargamos en el Build Command. Si es Windows, tu .exe
 const YTDLP_PATH = isProduction 
     ? path.join(__dirname, "bin", "yt-dlp") 
     : path.join(__dirname, "bin", "yt-dlp.exe");
 
-// En Render/Linux ffmpeg ya está instalado globalmente en el sistema, solo ponemos "ffmpeg"
-const FFMPEG_PATH = isProduction ? "ffmpeg" : path.join(__dirname, "bin", "ffmpeg.exe");
+const FFMPEG_PATH = ffmpegPath;
 
 const DOWNLOADS_PATH = path.join(__dirname, "downloads");
 
@@ -176,7 +172,7 @@ app.get("/api/get-file/:id", (req, res) => {
     }
 });
 
-// CAMBIO CRÍTICO: Escuchar en el puerto que te da Render
+// Escuchar en el puerto que te da Render
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en el puerto ${PORT}`);
