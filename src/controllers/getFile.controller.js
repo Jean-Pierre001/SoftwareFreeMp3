@@ -1,5 +1,6 @@
 const fs = require("fs")
 const { activeDownloads } = require("../utils/activeDownloads")
+const { getFile } = require("../service/getFile.service")
 
 getFileController = (req, res) => {
     const { id } = req.params;

@@ -1,4 +1,4 @@
-const activeDownloads = require("../utils/activeDownloads")
+const { activeDownloads } = require("../utils/activeDownloads")
 const path = require("path")
 const { spawn } = require("child_process")
 const fs = require("fs")
@@ -99,4 +99,4 @@ function download(url) {
     return downloadId
 }
 
-module.exports = download
+module.exports = { download }

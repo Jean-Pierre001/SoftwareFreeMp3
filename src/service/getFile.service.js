@@ -1,4 +1,4 @@
-const activeDownloads = require("../utils/activeDownloads")
+const { activeDownloads } = require("../utils/activeDownloads")
 const path = require("path")
 const fs = require("fs")
 const { DOWNLOADS_PATH } = require("../config/config.js")
@@ -44,4 +44,4 @@ function getFile(downloadId) {
     };
 };
 
-module.exports = getFile
+module.exports = { getFile }
