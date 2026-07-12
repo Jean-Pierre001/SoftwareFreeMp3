@@ -23,4 +23,4 @@ function inicializarServidor() {
     }
 }
 
-module.exports = inicializarServidor
+module.exports = { inicializarServidor }
