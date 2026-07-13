@@ -3,7 +3,7 @@ const { downloadPlaylist } = require("../service/downloadPlaylist.service")
 
 const downloadController = (req, res) => {
 
-    const { url, isPlaylist , limit} = req.body
+    const { url, isPlaylist, limit, format} = req.body
 
     if (!url) {
         return res.status(400).json({
@@ -13,7 +13,7 @@ const downloadController = (req, res) => {
 
     const downloadId = isPlaylist
         ? downloadPlaylist(url, limit)
-        : downloadService(url)
+        : downloadService(url, format)
 
     res.json({ downloadId })
 

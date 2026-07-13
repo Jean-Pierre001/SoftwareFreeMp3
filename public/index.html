@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoftwareFreeMp3</title>
+    <title>SoftwareFreeYTD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,28 +12,29 @@
 <body>
 
     <header>
-        <div class="brand">Software<span>FreeMp3</span></div>
+        <div class="brand">Software<span>FreeYTD</span></div>
     </header>
 
     <div class="tabs">
-        <button class="tab active" data-tab="video">Video</button>
-        <button class="tab" data-tab="playlist">Lista de reproducción</button>
+        <button class="tab active" data-tab="musica">Musica</button>
+        <button class="tab" data-tab="playlist">Lista de reproducción MP3</button>
+        <button class="tab" data-tab="video">Video</button>
     </div>
 
     <main class="container">
 
-        <!-- VIDEO -->
-        <section class="tab-content active" id="video">
+        <!-- MUSICA -->
+        <section class="tab-content active" id="musica">
 
             <div class="intro">
                 <h1>Descargar audio de YouTube</h1>
-                <p>Pegá el enlace del video y obtené el MP3.</p>
+                <p>Pegá el enlace del musica y obtené el MP3.</p>
             </div>
 
-            <form class="form-group downloadForm" data-playlist="false">
+            <form class="form-group downloadForm" data-playlist="false" data-format="MP3">
 
                 <div class="field">
-                    <label>URL del video</label>
+                    <label>URL del musica</label>
                     <input
                         type="text"
                         class="urlInput"
@@ -67,11 +68,11 @@
         <section class="tab-content" id="playlist">
 
             <div class="intro">
-                <h1>Descargar lista de reproducción</h1>
+                <h1>Descargar lista de reproducción MP3</h1>
                 <p>Pegá el enlace de una playlist de YouTube.</p>
             </div>
 
-            <form class="form-group downloadForm" data-playlist="true">
+            <form class="form-group downloadForm" data-playlist="true" data-format="MP3">
 
                 <!-- Agrupador de campos para mantener el orden visual -->
                 <div class="form-fields">
@@ -86,7 +87,7 @@
                     </div>
 
                     <div class="field field-limit">
-                        <label>Límite de videos</label>
+                        <label>Límite de musicas</label>
                         <input
                             type="number"
                             class="limitInput"
@@ -111,6 +112,47 @@
                         <span class="status-text"></span>
                     </div>
                     <div class="log-container"></div>
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- VIDEO -->
+        <section class="tab-content" id="video">
+
+            <div class="intro">
+                <h1>Descargar videos de YouTube</h1>
+                <p>Pegá el enlace del video y obtené el MP4.</p>
+            </div>
+
+            <form class="form-group downloadForm" data-playlist="false" data-format="MP4">
+
+                <div class="field">
+                    <label>URL del video</label>
+                    <input
+                        type="text"
+                        class="urlInput"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="startBtn">
+                    Descargar MP4
+                </button>
+
+                <div class="progress-line"></div>
+
+                <div class="result">
+
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span class="status-text"></span>
+                    </div>
+
+                    <div class="log-container"></div>
+
                 </div>
 
             </form>

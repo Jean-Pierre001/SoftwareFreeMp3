@@ -5,6 +5,7 @@ document.querySelectorAll(".downloadForm").forEach(form => {
         e.preventDefault();
 
         const isPlaylist = form.dataset.playlist === "true";
+        const format = form.dataset.format === "MP4";
 
         const urlInput = form.querySelector(".urlInput");
         const startBtn = form.querySelector(".startBtn");
@@ -41,7 +42,8 @@ document.querySelectorAll(".downloadForm").forEach(form => {
                 body: JSON.stringify({
                     url,
                     isPlaylist,
-                    limit
+                    limit,
+                    format
                 })
             });
 
