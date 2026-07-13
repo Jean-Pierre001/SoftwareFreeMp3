@@ -12,6 +12,7 @@ document.querySelectorAll(".downloadForm").forEach(form => {
         const logBox = form.querySelector(".log-container");
         const status = form.querySelector(".status-badge");
         const statusText = form.querySelector(".status-text");
+        const limit = form.querySelector('.limitInput')?.value || 10;
 
         const url = urlInput.value.trim();
 
@@ -39,7 +40,8 @@ document.querySelectorAll(".downloadForm").forEach(form => {
                 },
                 body: JSON.stringify({
                     url,
-                    isPlaylist
+                    isPlaylist,
+                    limit
                 })
             });
 

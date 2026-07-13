@@ -73,14 +73,30 @@
 
             <form class="form-group downloadForm" data-playlist="true">
 
-                <div class="field">
-                    <label>URL de la playlist</label>
-                    <input
-                        type="text"
-                        class="urlInput"
-                        placeholder="https://www.youtube.com/playlist?list=..."
-                        required
-                    >
+                <!-- Agrupador de campos para mantener el orden visual -->
+                <div class="form-fields">
+                    <div class="field field-url">
+                        <label>URL de la playlist</label>
+                        <input
+                            type="text"
+                            class="urlInput"
+                            placeholder="https://www.youtube.com/playlist?list=..."
+                            required
+                        >
+                    </div>
+
+                    <div class="field field-limit">
+                        <label>Límite de videos</label>
+                        <input
+                            type="number"
+                            class="limitInput"
+                            placeholder="10"
+                            min="1"
+                            max="200"
+                            value="10"
+                            required
+                        >
+                    </div>
                 </div>
 
                 <button type="submit" class="startBtn">
@@ -90,14 +106,11 @@
                 <div class="progress-line"></div>
 
                 <div class="result">
-
                     <div class="status-badge">
                         <span class="status-dot"></span>
                         <span class="status-text"></span>
                     </div>
-
                     <div class="log-container"></div>
-
                 </div>
 
             </form>

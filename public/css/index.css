@@ -273,6 +273,63 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
     display:block;
 }
 
+/* Contenedor flexible para los campos en el formulario de la playlist */
+.form-fields {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* El campo de la URL se expande para ocupar el espacio principal */
+.field-url {
+    flex: 1;
+}
+
+/* El campo numérico mantiene un tamaño controlado y elegante */
+.field-limit {
+    width: 140px;
+    flex-shrink: 0;
+}
+
+/* Estilo específico para el input numérico (fuente Mono para mejor legibilidad) */
+.limitInput {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* --- Remueve las flechas por defecto del input number --- */
+/* Chrome, Safari, Edge, Opera */
+.limitInput::-webkit-outer-spin-button,
+.limitInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.limitInput[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Adaptabilidad para pantallas chicas (Celulares) */
+@media (max-width: 480px) {
+    .form-fields {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .field-limit {
+        width: 100%;
+    }
+    
+    .limitInput {
+        text-align: left;
+        padding-left: 14px; /* Alineado con el placeholder clásico */
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

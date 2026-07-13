@@ -2,7 +2,7 @@ const path = require("path")
 const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
 const { FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
 
-const downloadPlaylist = (url) => {
+const downloadPlaylist = (url, limit) => {
 
     const downloadId = Date.now().toString()
 
@@ -20,7 +20,7 @@ const downloadPlaylist = (url) => {
         "--audio-format", "mp3",
 
         // Límite estricto de la playlist
-        "--playlist-end", "10",
+        "--playlist-end", limit,
 
         // Runtime JavaScript
         "--js-runtimes", "node",
