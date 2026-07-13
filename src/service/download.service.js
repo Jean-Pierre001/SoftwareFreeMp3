@@ -1,11 +1,9 @@
-const { activeDownloads } = require("../utils/activeDownloads")
 const path = require("path")
-const { spawn } = require("child_process")
-const fs = require("fs")
-const { cleanLog } = require("../utils/cleanLog.js")
-const { YTDLP_PATH, FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
+const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
 
-function download(url) {
+const { FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
+
+const downloadService = (url) => {
     const downloadId = Date.now().toString();
     const outputPath = path.join(DOWNLOADS_PATH, `[${downloadId}]-%(title)s.%(ext)s`);
 
@@ -40,63 +38,9 @@ function download(url) {
         "--output", outputPath
     ];
 
-    // Llamada directa al binario "yt-dlp" instalado en el sistema
-    const ytDlpProcess = spawn(YTDLP_PATH, args);
-
-    ytDlpProcess.on("error", (err) => {
-        console.error(err);
-
-        const state = activeDownloads.get(downloadId);
-
-        if (state) {
-            state.status = "failed";
-            state.logs.push(err.message);
-        }
-    });
-    
-    activeDownloads.set(downloadId, {
-        process: ytDlpProcess,
-        logs: ["Iniciando descarga con binario local..."],
-        status: "downloading"
-    });
-
-    console.log(`[INFO] Descarga ${downloadId} iniciada para: ${url}`);
-
-    ytDlpProcess.stdout.on("data", (data) => {
-        const line = cleanLog(data);
-        if (!line) return;
-        
-        const state = activeDownloads.get(downloadId);
-        if (state) {
-            state.logs.push(line);
-            console.log(`[yt-dlp ${downloadId}]: ${line}`);
-        }
-    });
-
-    ytDlpProcess.stderr.on("data", (data) => {
-        const line = cleanLog(data);
-        if (!line) return;
-
-        console.error(`[ERROR yt-dlp ${downloadId}]: ${line}`);
-        const state = activeDownloads.get(downloadId);
-        if (state) state.logs.push(`[ERR] ${line}`);
-    });
-
-    ytDlpProcess.on("close", (code) => {
-        console.log(`[INFO] Proceso ${downloadId} finalizado con código ${code}`);
-        const state = activeDownloads.get(downloadId);
-        if (!state) return;
-
-        if (code === 0) {
-            state.status = "completed";
-            state.logs.push("¡Proceso completado con éxito!");
-        } else {
-            state.status = "failed";
-            state.logs.push(`El proceso terminó con errores (Código ${code}).`);
-        }
-    });
+    ytDlpProcessUtil(downloadId, args, url)
 
     return downloadId
 }
 
-module.exports = { download }
+module.exports = { downloadService }

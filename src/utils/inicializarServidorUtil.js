@@ -1,7 +1,7 @@
 const { YTDLP_PATH, FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
 const fs = require("fs")
 
-function inicializarServidor() {
+const inicializarServidorUtil = () => {
     if (!fs.existsSync(YTDLP_PATH)) {
         console.error("Archivo yt-dlp.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
         console.log("YTDLP_PATH:", YTDLP_PATH);
@@ -23,4 +23,4 @@ function inicializarServidor() {
     }
 }
 
-module.exports = { inicializarServidor }
+module.exports = { inicializarServidorUtil }

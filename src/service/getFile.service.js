@@ -1,10 +1,10 @@
-const { activeDownloads } = require("../utils/activeDownloads")
+const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil.js")
 const path = require("path")
 const fs = require("fs")
 const { DOWNLOADS_PATH } = require("../config/config.js")
 
-function getFile(downloadId) {
-    const state = activeDownloads.get(downloadId);
+const getFileService = (downloadId) => {
+    const state = activeDownloadsUtil.get(downloadId);
 
     if (!state || state.status !== "completed") {
         return {
@@ -44,4 +44,4 @@ function getFile(downloadId) {
     };
 };
 
-module.exports = { getFile }
+module.exports = { getFileService }

@@ -1,9 +1,9 @@
-const { download } = require("../service/download.service")
-const { activeDownloads } = require("../utils/activeDownloads")
+const { downloadService } = require("../service/download.service")
+const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil")
 
-channelSSEController = (req, res) => {
+const channelSSEController = (req, res) => {
     const downloadId = req.params.id;
-    const state = activeDownloads.get(downloadId);
+    const state = activeDownloadsUtil.get(downloadId);
 
     if (!state) {
         return res.status(404).send("Descarga no encontrada.");
@@ -16,7 +16,7 @@ channelSSEController = (req, res) => {
     let logIndex = 0;
 
     const interval = setInterval(() => {
-        const currentState = activeDownloads.get(downloadId);
+        const currentState = activeDownloadsUtil.get(downloadId);
         if (!currentState) {
             clearInterval(interval);
             res.end();

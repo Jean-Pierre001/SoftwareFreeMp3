@@ -1,11 +1,11 @@
 const fs = require("fs")
-const { activeDownloads } = require("../utils/activeDownloads")
-const { getFile } = require("../service/getFile.service")
+const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil")
+const { getFileService } = require("../service/getFile.service")
 
-getFileController = (req, res) => {
+const getFileController = (req, res) => {
     const { id } = req.params;
 
-    const result = getFile(id);
+    const result = getFileService(id);
 
     if (!result.ok) {
         return res.status(result.status).send(result.message);
@@ -14,7 +14,7 @@ getFileController = (req, res) => {
     res.download(result.filePath, result.clientName, (err) => {
         if (!err) {
             fs.unlink(result.filePath, () => {});
-            activeDownloads.delete(id);
+            activeDownloadsUtil.delete(id);
         }
     });
 };
