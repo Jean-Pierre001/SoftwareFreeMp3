@@ -15,31 +15,95 @@
         <div class="brand">Software<span>FreeMp3</span></div>
     </header>
 
+    <div class="tabs">
+        <button class="tab active" data-tab="video">Video</button>
+        <button class="tab" data-tab="playlist">Lista de reproducción</button>
+    </div>
+
     <main class="container">
-        <div class="intro">
-            <h1>Descargar audio de YouTube</h1>
-            <p>Pegá el enlace del video y obtené el MP3.</p>
-        </div>
 
-        <form class="form-group" id="downloadForm">
-            <div class="field">
-                <label for="urlInput">URL del video</label>
-                <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" required>
+        <!-- VIDEO -->
+        <section class="tab-content active" id="video">
+
+            <div class="intro">
+                <h1>Descargar audio de YouTube</h1>
+                <p>Pegá el enlace del video y obtené el MP3.</p>
             </div>
-            <button type="submit" id="startBtn">
-                <span class="btn-label">Descargar MP3</span>
-            </button>
-        </form>
 
-        <div class="progress-line" id="progressLine"></div>
+            <form class="form-group downloadForm" data-playlist="false">
 
-        <div class="result" id="result">
-            <div id="status" class="status-badge">
-                <span class="status-dot"></span>
-                <span class="status-text"></span>
+                <div class="field">
+                    <label>URL del video</label>
+                    <input
+                        type="text"
+                        class="urlInput"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="startBtn">
+                    Descargar MP3
+                </button>
+
+                <div class="progress-line"></div>
+
+                <div class="result">
+
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span class="status-text"></span>
+                    </div>
+
+                    <div class="log-container"></div>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- PLAYLIST -->
+        <section class="tab-content" id="playlist">
+
+            <div class="intro">
+                <h1>Descargar lista de reproducción</h1>
+                <p>Pegá el enlace de una playlist de YouTube.</p>
             </div>
-            <div id="logBox" class="log-container"></div>
-        </div>
+
+            <form class="form-group downloadForm" data-playlist="true">
+
+                <div class="field">
+                    <label>URL de la playlist</label>
+                    <input
+                        type="text"
+                        class="urlInput"
+                        placeholder="https://www.youtube.com/playlist?list=..."
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="startBtn">
+                    Descargar Playlist
+                </button>
+
+                <div class="progress-line"></div>
+
+                <div class="result">
+
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span class="status-text"></span>
+                    </div>
+
+                    <div class="log-container"></div>
+
+                </div>
+
+            </form>
+
+        </section>
+
     </main>
 
     <script src="/js/index.js"></script>

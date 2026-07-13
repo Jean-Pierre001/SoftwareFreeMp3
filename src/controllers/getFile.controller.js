@@ -1,22 +1,53 @@
-const fs = require("fs")
+const fs = require("path")
+const path = require("path")
+const fsExtra = require("fs") // Usamos el fs nativo que ya tenías
+
 const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil")
 const { getFileService } = require("../service/getFile.service")
 
-const getFileController = (req, res) => {
-    const { id } = req.params;
+const getFileController = async (req, res) => {
 
-    const result = getFileService(id);
+    const { id } = req.params
+
+    // Ajuste clave: agregamos el await porque el servicio ahora procesa el zip de forma asíncrona
+    const result = await getFileService(id)
 
     if (!result.ok) {
-        return res.status(result.status).send(result.message);
+        return res.status(result.status).send(result.message)
     }
 
-    res.download(result.filePath, result.clientName, (err) => {
-        if (!err) {
-            fs.unlink(result.filePath, () => {});
-            activeDownloadsUtil.delete(id);
-        }
-    });
-};
+    res.download(result.filePath, result.clientName, err => {
 
-module.exports = { getFileController }
+        if (err) {
+            console.error("Error en la descarga del cliente:", err);
+            // Si hay un error, igualmente intentamos limpiar los archivos residuales
+        }
+
+        if (result.filePath.endsWith(".zip")) {
+
+            const folderPath = result.filePath.replace(/\.zip$/, "")
+
+            // Borra el .zip generado
+            fsExtra.unlink(result.filePath, () => {})
+
+            // Borra la carpeta original de canciones
+            fsExtra.rm(folderPath, {
+                recursive: true,
+                force: true
+            }, () => {})
+
+        } else {
+
+            fsExtra.unlink(result.filePath, () => {})
+
+        }
+
+        activeDownloadsUtil.delete(id)
+
+    })
+
+}
+
+module.exports = {
+    getFileController
+}

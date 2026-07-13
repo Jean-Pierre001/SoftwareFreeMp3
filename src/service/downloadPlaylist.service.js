@@ -1,20 +1,28 @@
 const path = require("path")
 const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
-
 const { FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
 
-const downloadService = (url) => {
-    const downloadId = Date.now().toString();
-    const outputPath = path.join(DOWNLOADS_PATH, `[${downloadId}]-%(title)s.%(ext)s`);
+const downloadPlaylist = (url) => {
 
-    // Argumentos para yt-dlp
+    const downloadId = Date.now().toString()
+
+    // Guarda todos los MP3 en una carpeta con el ID de la descarga
+    const outputPath = path.join(
+        DOWNLOADS_PATH,
+        downloadId,
+        "%(playlist_index)02d - %(title)s.%(ext)s"
+    )
+
     const args = [
         url,
 
         "--extract-audio",
         "--audio-format", "mp3",
 
-        // Runtime JavaScript para resolver desafíos de YouTube
+        // Límite estricto de la playlist
+        "--playlist-end", "10",
+
+        // Runtime JavaScript
         "--js-runtimes", "node",
 
         // Cliente de YouTube
@@ -29,18 +37,18 @@ const downloadService = (url) => {
 
         "--ffmpeg-location", FFMPEG_PATH,
 
-        "--no-playlist",
         "--force-ipv4",
 
         "--retries", "10",
         "--fragment-retries", "10",
 
         "--output", outputPath
-    ];
+    ]
 
     ytDlpProcessUtil(downloadId, args, url)
 
     return downloadId
+
 }
 
-module.exports = { downloadService }    
+module.exports = { downloadPlaylist }
