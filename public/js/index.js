@@ -66,7 +66,7 @@ form.addEventListener("submit", async (e) => {
 
     const isPlaylist = isPlaylistCheckbox.checked;
     const limit = limitInput.value || 10;
-    const format = selectedFormat === "MP4";
+    const format = selectedFormat
 
     startBtn.disabled = true;
     progressLine.classList.add("active");

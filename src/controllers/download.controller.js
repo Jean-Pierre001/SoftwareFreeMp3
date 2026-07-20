@@ -12,7 +12,7 @@ const downloadController = (req, res) => {
     }
 
     const downloadId = isPlaylist
-        ? downloadPlaylist(url, limit)
+        ? downloadPlaylist(url, limit, format)
         : downloadService(url, format)
 
     res.json({ downloadId })
