@@ -2,8 +2,10 @@ const path = require("path")
 const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
 const { FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
 
-const downloadService = (url, format) => {
+const downloadService = (url, format, start, end) => {
+
     const downloadId = Date.now().toString()
+
     const outputPath = path.join(
         DOWNLOADS_PATH,
         `[${downloadId}]-%(title)s.%(ext)s`
@@ -25,10 +27,20 @@ const downloadService = (url, format) => {
         ]
     }
 
+    let trimArgs = []
+
+    if (start && end) {
+        trimArgs = [
+            "--download-sections",
+            `*${start}-${end}`
+        ]
+    }
+
     const args = [
         url,
 
         ...formatArgs,
+        ...trimArgs,
 
         "--ffmpeg-location", FFMPEG_PATH,
 
@@ -52,6 +64,7 @@ const downloadService = (url, format) => {
     ytDlpProcessUtil(downloadId, args, url)
 
     return downloadId
+
 }
 
 module.exports = { downloadService }

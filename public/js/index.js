@@ -11,7 +11,28 @@ const isPlaylistCheckbox = document.getElementById("isPlaylist");
 const limitField = document.getElementById("limitField");
 const limitInput = document.getElementById("limit");
 
+const trimToggle = document.getElementById("trimToggle");
+const trimPanel = document.getElementById("trimPanel");
+const trimLoading = document.getElementById("trimLoading");
+const trimError = document.getElementById("trimError");
+const trimErrorMsg = document.getElementById("trimErrorMsg");
+const trimRetryBtn = document.getElementById("trimRetryBtn");
+const trimContent = document.getElementById("trimContent");
+const trimThumb = document.getElementById("trimThumb");
+const trimTitle = document.getElementById("trimTitle");
+const trimUploader = document.getElementById("trimUploader");
+const trimStartInput = document.getElementById("trimStart");
+const trimEndInput = document.getElementById("trimEnd");
+const trimRangeFill = document.getElementById("trimRange");
+const trimStartTime = document.getElementById("trimStartTime");
+const trimEndTime = document.getElementById("trimEndTime");
+const trimSelectionLabel = document.getElementById("trimSelectionLabel");
+
 let selectedFormat = "MP3";
+let trimInfo = null; // { duration, start, end }
+let trimLoadedForUrl = null;
+
+const MIN_TRIM_GAP = 1; // segundos mínimos entre inicio y fin
 
 // ---------- Selector de formato ----------
 
@@ -23,10 +44,238 @@ formatBtns.forEach(btn => {
     });
 });
 
-// ---------- Mostrar/ocultar límite según playlist ----------
+// ---------- Mostrar/ocultar límite según playlist, y exclusión mutua con "Recortar" ----------
 
 isPlaylistCheckbox.addEventListener("change", () => {
+
     limitField.classList.toggle("open", isPlaylistCheckbox.checked);
+
+    // el recorte solo tiene sentido para un único video, no para una playlist
+    trimToggle.disabled = isPlaylistCheckbox.checked;
+
+    if (isPlaylistCheckbox.checked && trimToggle.checked) {
+        trimToggle.checked = false;
+        closeTrimPanel();
+    }
+
+});
+
+// ---------- Panel de recorte ----------
+
+trimToggle.addEventListener("change", () => {
+
+    if (trimToggle.checked) {
+
+        isPlaylistCheckbox.checked = false;
+        isPlaylistCheckbox.disabled = true;
+        limitField.classList.remove("open");
+
+        trimPanel.classList.add("open");
+        loadTrimInfo();
+
+    } else {
+
+        isPlaylistCheckbox.disabled = false;
+        closeTrimPanel();
+
+    }
+
+});
+
+trimRetryBtn.addEventListener("click", loadTrimInfo);
+
+// si el enlace cambia después de haber cargado la info, invalida la caché
+urlInput.addEventListener("input", () => {
+    if (urlInput.value.trim() !== trimLoadedForUrl) {
+        trimLoadedForUrl = null;
+        trimInfo = null;
+
+    if (trimToggle.checked) {
+        trimToggle.checked = false;
+        trimToggle.dispatchEvent(new Event("change"));
+    }
+    }
+});
+
+function closeTrimPanel() {
+
+    trimPanel.classList.remove("open");
+
+    trimInfo = null;
+    trimLoadedForUrl = null;
+
+    // ocultar todos los estados del card
+    trimLoading.classList.remove("active");
+    trimError.classList.remove("active");
+    trimContent.classList.remove("active");
+
+    // limpiar contenido
+    trimThumb.removeAttribute("src");
+    trimThumb.alt = "";
+
+    trimTitle.textContent = "";
+    trimUploader.textContent = "";
+
+    trimStartInput.value = 0;
+    trimEndInput.value = 0;
+
+    trimStartInput.max = 0;
+    trimEndInput.max = 0;
+
+    trimStartTime.value = "00:00";
+    trimEndTime.value = "00:00";
+
+    trimRangeFill.style.left = "0%";
+    trimRangeFill.style.width = "0%";
+
+    trimSelectionLabel.textContent = "0 segundos seleccionados";
+}
+
+function showTrimState(state) {
+    [trimLoading, trimError, trimContent].forEach(el => el.classList.remove("active"));
+    state.classList.add("active");
+}
+
+async function loadTrimInfo() {
+
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        showTrimState(trimError);
+        trimErrorMsg.textContent = "Pegá un enlace antes de recortar.";
+        return;
+    }
+
+    // ya la tenemos para este mismo enlace, no hace falta pedirla de nuevo
+    if (trimLoadedForUrl === url && trimInfo) {
+        showTrimState(trimContent);
+        return;
+    }
+
+    showTrimState(trimLoading);
+
+    try {
+
+        const response = await fetch("/api/download-information", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+            throw new Error(data.error || "No se pudo obtener la información del video.");
+        }
+
+        const duration = Math.max(1, Math.floor(data.duration || 0));
+
+        trimInfo = { duration, start: 0, end: duration };
+        trimLoadedForUrl = url;
+
+        trimThumb.src = data.thumbnail || "";
+        trimThumb.alt = data.title || "Miniatura del video";
+        trimTitle.textContent = data.title || "Sin título";
+        trimUploader.textContent = data.uploader || "";
+
+        trimStartInput.min = 0;
+        trimStartInput.max = duration;
+        trimStartInput.value = 0;
+
+        trimEndInput.min = 0;
+        trimEndInput.max = duration;
+        trimEndInput.value = duration;
+
+        updateTrimSliderUI();
+        showTrimState(trimContent);
+
+    } catch (err) {
+
+        showTrimState(trimError);
+        trimErrorMsg.textContent = err.message || "No se pudo conectar con el servidor.";
+
+    }
+
+}
+
+function formatSeconds(totalSeconds) {
+    const s = Math.max(0, Math.round(totalSeconds));
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
+function parseTimeText(text) {
+    const parts = text.trim().split(":").map(p => parseInt(p, 10));
+    if (parts.some(Number.isNaN)) return null;
+    if (parts.length === 1) return parts[0];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return null;
+}
+
+function updateTrimSliderUI() {
+
+    const max = Number(trimStartInput.max) || 1;
+    const start = Number(trimStartInput.value);
+    const end = Number(trimEndInput.value);
+
+    const startPct = (start / max) * 100;
+    const endPct = (end / max) * 100;
+
+    trimRangeFill.style.left = `${startPct}%`;
+    trimRangeFill.style.width = `${Math.max(0, endPct - startPct)}%`;
+
+    trimStartTime.value = formatSeconds(start);
+    trimEndTime.value = formatSeconds(end);
+    trimSelectionLabel.textContent = `${formatSeconds(end - start)} seleccionados`;
+
+    if (trimInfo) {
+        trimInfo.start = start;
+        trimInfo.end = end;
+    }
+
+}
+
+trimStartInput.addEventListener("input", () => {
+    const maxStart = Number(trimEndInput.value) - MIN_TRIM_GAP;
+    if (Number(trimStartInput.value) > maxStart) {
+        trimStartInput.value = Math.max(0, maxStart);
+    }
+    updateTrimSliderUI();
+});
+
+trimEndInput.addEventListener("input", () => {
+    const minEnd = Number(trimStartInput.value) + MIN_TRIM_GAP;
+    if (Number(trimEndInput.value) < minEnd) {
+        trimEndInput.value = Math.min(Number(trimEndInput.max), minEnd);
+    }
+    updateTrimSliderUI();
+});
+
+trimStartTime.addEventListener("change", () => {
+    const seconds = parseTimeText(trimStartTime.value);
+    const max = Number(trimEndInput.value) - MIN_TRIM_GAP;
+    if (seconds === null) {
+        updateTrimSliderUI();
+        return;
+    }
+    trimStartInput.value = Math.min(Math.max(seconds, 0), Math.max(0, max));
+    updateTrimSliderUI();
+});
+
+trimEndTime.addEventListener("change", () => {
+    const seconds = parseTimeText(trimEndTime.value);
+    const min = Number(trimStartInput.value) + MIN_TRIM_GAP;
+    const max = Number(trimEndInput.max);
+    if (seconds === null) {
+        updateTrimSliderUI();
+        return;
+    }
+    trimEndInput.value = Math.max(Math.min(seconds, max), Math.min(min, max));
+    updateTrimSliderUI();
 });
 
 // ---------- Placeholder rotativo: refuerza "cualquier plataforma" ----------
@@ -66,7 +315,14 @@ form.addEventListener("submit", async (e) => {
 
     const isPlaylist = isPlaylistCheckbox.checked;
     const limit = limitInput.value || 10;
-    const format = selectedFormat
+    const format = selectedFormat;
+
+    const payload = { url, isPlaylist, limit, format };
+
+    if (trimToggle.checked && trimInfo) {
+        payload.start = trimInfo.start;
+        payload.end = trimInfo.end;
+    }
 
     startBtn.disabled = true;
     progressLine.classList.add("active");
@@ -85,12 +341,7 @@ form.addEventListener("submit", async (e) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                url,
-                isPlaylist,
-                limit,
-                format
-            })
+            body: JSON.stringify(payload)
         });
 
         const initData = await response.json();
@@ -128,6 +379,13 @@ form.addEventListener("submit", async (e) => {
                     progressLine.classList.remove("active");
                     startBtn.disabled = false;
                     urlInput.value = "";
+
+                    // 👇 esto es lo que faltaba
+                    if (trimToggle.checked) {
+                        trimToggle.checked = false;
+                    }
+                    isPlaylistCheckbox.disabled = false;
+                    closeTrimPanel();
 
                     eventSource.close();
 

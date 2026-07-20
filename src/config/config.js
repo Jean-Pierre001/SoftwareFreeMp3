@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const ffmpegPath = require("ffmpeg-static");
 const DOWNLOADS_PATH = path.join(__dirname, "../tempDowloads");
+const COOKIES_PATH = path.join(__dirname, "../cookies.txt")
 
 const YTDLP_PATH =
     process.platform === "win32"
@@ -14,5 +15,6 @@ module.exports = {
     PORT,
     YTDLP_PATH,
     FFMPEG_PATH,
-    DOWNLOADS_PATH
+    DOWNLOADS_PATH,
+    COOKIES_PATH
 }

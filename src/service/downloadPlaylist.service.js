@@ -1,8 +1,8 @@
 const path = require("path")
 const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
-const { FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
+const { FFMPEG_PATH, DOWNLOADS_PATH, COOKIES_PATH } = require("../config/config.js")
 
-const downloadPlaylist = (url, limit, format) => {
+const downloadPlaylistService = (url, limit, format) => {
 
     const downloadId = Date.now().toString()
 
@@ -32,6 +32,8 @@ const downloadPlaylist = (url, limit, format) => {
         url,
 
         ...formatArgs,
+        
+        "--cookies", COOKIES_PATH,
 
         "--playlist-end", limit,
 
@@ -58,4 +60,4 @@ const downloadPlaylist = (url, limit, format) => {
 
 }
 
-module.exports = { downloadPlaylist }
+module.exports = { downloadPlaylistService }

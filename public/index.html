@@ -82,15 +82,25 @@
                     </button>
                 </div>
 
-                <label class="playlist-check">
-                    <input type="checkbox" id="isPlaylist">
-                    <span class="check-box"></span>
-                    <span class="check-label">Es una lista de reproducción</span>
-                </label>
+                <div class="checks-col">
+
+                    <label class="option-check">
+                        <input type="checkbox" id="isPlaylist">
+                        <span class="check-box"></span>
+                        <span class="check-label">Es una lista de reproducción</span>
+                    </label>
+
+                    <label class="option-check" id="trimCheckWrap">
+                        <input type="checkbox" id="trimToggle">
+                        <span class="check-box"></span>
+                        <span class="check-label">Recortar (elegir inicio y fin)</span>
+                    </label>
+
+                </div>
 
             </div>
 
-            <div class="field field-limit" id="limitField">
+            <div class="field field-limit collapsible" id="limitField">
                 <label for="limit">Límite de elementos</label>
                 <input
                     type="number"
@@ -100,6 +110,56 @@
                     max="200"
                     value="10"
                 >
+            </div>
+
+            <div class="trim-panel collapsible" id="trimPanel">
+                <div class="trim-inner">
+
+                    <div class="trim-state trim-loading" id="trimLoading">
+                        <span class="spinner" aria-hidden="true"></span>
+                        Obteniendo información del video...
+                    </div>
+
+                    <div class="trim-state trim-error" id="trimError">
+                        <span id="trimErrorMsg">No se pudo obtener la información.</span>
+                        <button type="button" class="trim-retry" id="trimRetryBtn">Reintentar</button>
+                    </div>
+
+                    <div class="trim-state trim-content" id="trimContent">
+
+                        <div class="trim-meta">
+                            <img id="trimThumb" alt="" class="trim-thumb">
+                            <div class="trim-meta-text">
+                                <div class="trim-title" id="trimTitle"></div>
+                                <div class="trim-uploader" id="trimUploader"></div>
+                            </div>
+                        </div>
+
+                        <div class="trim-slider-wrap">
+                            <div class="trim-track">
+                                <div class="trim-range" id="trimRange"></div>
+                            </div>
+                            <input type="range" id="trimStart" class="trim-range-input" min="0" max="100" value="0" step="1" aria-label="Inicio del recorte">
+                            <input type="range" id="trimEnd" class="trim-range-input" min="0" max="100" value="100" step="1" aria-label="Fin del recorte">
+                        </div>
+
+                        <div class="trim-times">
+                            <label class="trim-time-field">
+                                <span>Inicio</span>
+                                <input type="text" id="trimStartTime" class="trim-time-input" value="00:00" inputmode="numeric">
+                            </label>
+
+                            <span class="trim-selection" id="trimSelectionLabel">0:00 seleccionados</span>
+
+                            <label class="trim-time-field trim-time-field-end">
+                                <span>Fin</span>
+                                <input type="text" id="trimEndTime" class="trim-time-input" value="00:00" inputmode="numeric">
+                            </label>
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
 
             <button type="submit" class="startBtn">Descargar</button>
@@ -158,6 +218,8 @@
                     <a href="https://9gag.com" target="_blank" rel="noopener noreferrer">9GAG</a>
                 </div>
             </div>
+
+            <p class="sidebar-note">+ todo lo que soporte yt-dlp</p>
 
         </aside>
 
