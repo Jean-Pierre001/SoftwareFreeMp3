@@ -3,163 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoftwareFreeYTD</title>
+    <title>SoftwareFreeYTD — Descargá desde cualquier plataforma</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
 
     <header>
         <div class="brand">Software<span>FreeYTD</span></div>
+        <div class="brand-tag">un enlace, cualquier origen</div>
     </header>
 
-    <div class="tabs">
-        <button class="tab active" data-tab="musica">Musica</button>
-        <button class="tab" data-tab="playlist">Lista de reproducción MP3</button>
-        <button class="tab" data-tab="video">Video</button>
+    <div class="page-shell">
+
+        <aside class="sidebar sidebar-left" aria-label="Plataformas compatibles (video y en vivo)">
+
+            <div class="sidebar-group">
+                <h2>Video &amp; redes</h2>
+                <div class="sidebar-links">
+                    <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a>
+                    <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer">TikTok</a>
+                    <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+                    <a href="https://x.com" target="_blank" rel="noopener noreferrer">X / Twitter</a>
+                    <a href="https://vimeo.com" target="_blank" rel="noopener noreferrer">Vimeo</a>
+                    <a href="https://www.dailymotion.com" target="_blank" rel="noopener noreferrer">Dailymotion</a>
+                    <a href="https://www.reddit.com" target="_blank" rel="noopener noreferrer">Reddit</a>
+                    <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer">Pinterest</a>
+                    <a href="https://www.tumblr.com" target="_blank" rel="noopener noreferrer">Tumblr</a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <h2>En vivo</h2>
+                <div class="sidebar-links">
+                    <a href="https://www.twitch.tv" target="_blank" rel="noopener noreferrer">Twitch</a>
+                    <a href="https://kick.com" target="_blank" rel="noopener noreferrer">Kick</a>
+                    <a href="https://www.nicovideo.jp" target="_blank" rel="noopener noreferrer">Niconico</a>
+                    <a href="https://www.afreecatv.com" target="_blank" rel="noopener noreferrer">AfreecaTV</a>
+                    <a href="https://vk.com" target="_blank" rel="noopener noreferrer">VK</a>
+                    <a href="https://ok.ru" target="_blank" rel="noopener noreferrer">Odnoklassniki</a>
+                </div>
+            </div>
+
+        </aside>
+
+        <main class="container">
+
+            <section class="hero">
+                <h1>Pegá el enlace.<br>Nosotros lo bajamos.</h1>
+                <p>No importa de dónde venga: pegalo y elegí cómo lo querés.</p>
+            </section>
+
+            <form class="panel" id="downloadForm">
+
+            <div class="field field-url">
+                <label for="url">Enlace</label>
+                <input
+                    type="text"
+                    id="url"
+                    class="urlInput"
+                    autocomplete="off"
+                    spellcheck="false"
+                    required
+                >
+            </div>
+
+            <div class="options-row">
+
+                <div class="format-toggle" role="group" aria-label="Formato de descarga">
+                    <button type="button" class="format-btn active" data-format="MP3">
+                        MP3 <span>audio</span>
+                    </button>
+                    <button type="button" class="format-btn" data-format="MP4">
+                        MP4 <span>video</span>
+                    </button>
+                </div>
+
+                <label class="playlist-check">
+                    <input type="checkbox" id="isPlaylist">
+                    <span class="check-box"></span>
+                    <span class="check-label">Es una lista de reproducción</span>
+                </label>
+
+            </div>
+
+            <div class="field field-limit" id="limitField">
+                <label for="limit">Límite de elementos</label>
+                <input
+                    type="number"
+                    id="limit"
+                    class="limitInput"
+                    min="1"
+                    max="200"
+                    value="10"
+                >
+            </div>
+
+            <button type="submit" class="startBtn">Descargar</button>
+
+            <div class="progress-line"></div>
+
+            <div class="result">
+
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span class="status-text"></span>
+                </div>
+
+                <div class="log-container"></div>
+
+            </div>
+
+            </form>
+
+        </main>
+
+        <aside class="sidebar sidebar-right" aria-label="Plataformas compatibles (audio, noticias y más)">
+
+            <div class="sidebar-group">
+                <h2>Audio &amp; música</h2>
+                <div class="sidebar-links">
+                    <a href="https://soundcloud.com" target="_blank" rel="noopener noreferrer">SoundCloud</a>
+                    <a href="https://bandcamp.com" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+                    <a href="https://www.mixcloud.com" target="_blank" rel="noopener noreferrer">Mixcloud</a>
+                    <a href="https://audiomack.com" target="_blank" rel="noopener noreferrer">Audiomack</a>
+                    <a href="https://www.npr.org" target="_blank" rel="noopener noreferrer">NPR</a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <h2>Noticias &amp; medios</h2>
+                <div class="sidebar-links">
+                    <a href="https://www.bbc.com" target="_blank" rel="noopener noreferrer">BBC</a>
+                    <a href="https://www.cnn.com" target="_blank" rel="noopener noreferrer">CNN</a>
+                    <a href="https://www.bloomberg.com" target="_blank" rel="noopener noreferrer">Bloomberg</a>
+                    <a href="https://www.theguardian.com" target="_blank" rel="noopener noreferrer">The Guardian</a>
+                    <a href="https://www.cbsnews.com" target="_blank" rel="noopener noreferrer">CBS News</a>
+                    <a href="https://www.espn.com" target="_blank" rel="noopener noreferrer">ESPN</a>
+                    <a href="https://www.nbcnews.com" target="_blank" rel="noopener noreferrer">NBC</a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <h2>Y más</h2>
+                <div class="sidebar-links">
+                    <a href="https://rumble.com" target="_blank" rel="noopener noreferrer">Rumble</a>
+                    <a href="https://streamable.com" target="_blank" rel="noopener noreferrer">Streamable</a>
+                    <a href="https://www.bitchute.com" target="_blank" rel="noopener noreferrer">BitChute</a>
+                    <a href="https://www.bilibili.com" target="_blank" rel="noopener noreferrer">Bilibili</a>
+                    <a href="https://imgur.com" target="_blank" rel="noopener noreferrer">Imgur</a>
+                    <a href="https://9gag.com" target="_blank" rel="noopener noreferrer">9GAG</a>
+                </div>
+            </div>
+
+        </aside>
+
     </div>
-
-    <main class="container">
-
-        <!-- MUSICA -->
-        <section class="tab-content active" id="musica">
-
-            <div class="intro">
-                <h1>Descargar audio de YouTube</h1>
-                <p>Pegá el enlace del musica y obtené el MP3.</p>
-            </div>
-
-            <form class="form-group downloadForm" data-playlist="false" data-format="MP3">
-
-                <div class="field">
-                    <label>URL del musica</label>
-                    <input
-                        type="text"
-                        class="urlInput"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="startBtn">
-                    Descargar MP3
-                </button>
-
-                <div class="progress-line"></div>
-
-                <div class="result">
-
-                    <div class="status-badge">
-                        <span class="status-dot"></span>
-                        <span class="status-text"></span>
-                    </div>
-
-                    <div class="log-container"></div>
-
-                </div>
-
-            </form>
-
-        </section>
-
-        <!-- PLAYLIST -->
-        <section class="tab-content" id="playlist">
-
-            <div class="intro">
-                <h1>Descargar lista de reproducción MP3</h1>
-                <p>Pegá el enlace de una playlist de YouTube.</p>
-            </div>
-
-            <form class="form-group downloadForm" data-playlist="true" data-format="MP3">
-
-                <!-- Agrupador de campos para mantener el orden visual -->
-                <div class="form-fields">
-                    <div class="field field-url">
-                        <label>URL de la playlist</label>
-                        <input
-                            type="text"
-                            class="urlInput"
-                            placeholder="https://www.youtube.com/playlist?list=..."
-                            required
-                        >
-                    </div>
-
-                    <div class="field field-limit">
-                        <label>Límite de musicas</label>
-                        <input
-                            type="number"
-                            class="limitInput"
-                            placeholder="10"
-                            min="1"
-                            max="200"
-                            value="10"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <button type="submit" class="startBtn">
-                    Descargar Playlist
-                </button>
-
-                <div class="progress-line"></div>
-
-                <div class="result">
-                    <div class="status-badge">
-                        <span class="status-dot"></span>
-                        <span class="status-text"></span>
-                    </div>
-                    <div class="log-container"></div>
-                </div>
-
-            </form>
-
-        </section>
-
-        <!-- VIDEO -->
-        <section class="tab-content" id="video">
-
-            <div class="intro">
-                <h1>Descargar videos de YouTube</h1>
-                <p>Pegá el enlace del video y obtené el MP4.</p>
-            </div>
-
-            <form class="form-group downloadForm" data-playlist="false" data-format="MP4">
-
-                <div class="field">
-                    <label>URL del video</label>
-                    <input
-                        type="text"
-                        class="urlInput"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="startBtn">
-                    Descargar MP4
-                </button>
-
-                <div class="progress-line"></div>
-
-                <div class="result">
-
-                    <div class="status-badge">
-                        <span class="status-dot"></span>
-                        <span class="status-text"></span>
-                    </div>
-
-                    <div class="log-container"></div>
-
-                </div>
-
-            </form>
-
-        </section>
-
-    </main>
 
     <script src="/js/index.js"></script>
 </body>

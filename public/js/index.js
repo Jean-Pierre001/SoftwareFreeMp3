@@ -1,147 +1,177 @@
-document.querySelectorAll(".downloadForm").forEach(form => {
+const form = document.getElementById("downloadForm");
+const urlInput = document.getElementById("url");
+const startBtn = form.querySelector(".startBtn");
+const progressLine = form.querySelector(".progress-line");
+const logBox = form.querySelector(".log-container");
+const status = form.querySelector(".status-badge");
+const statusText = form.querySelector(".status-text");
 
-    form.addEventListener("submit", async (e) => {
+const formatBtns = form.querySelectorAll(".format-btn");
+const isPlaylistCheckbox = document.getElementById("isPlaylist");
+const limitField = document.getElementById("limitField");
+const limitInput = document.getElementById("limit");
 
-        e.preventDefault();
+let selectedFormat = "MP3";
 
-        const isPlaylist = form.dataset.playlist === "true";
-        const format = form.dataset.format === "MP4";
+// ---------- Selector de formato ----------
 
-        const urlInput = form.querySelector(".urlInput");
-        const startBtn = form.querySelector(".startBtn");
-        const progressLine = form.querySelector(".progress-line");
-        const logBox = form.querySelector(".log-container");
-        const status = form.querySelector(".status-badge");
-        const statusText = form.querySelector(".status-text");
-        const limit = form.querySelector('.limitInput')?.value || 10;
+formatBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        formatBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedFormat = btn.dataset.format;
+    });
+});
 
-        const url = urlInput.value.trim();
+// ---------- Mostrar/ocultar límite según playlist ----------
 
-        if (!url) {
-            urlInput.focus();
+isPlaylistCheckbox.addEventListener("change", () => {
+    limitField.classList.toggle("open", isPlaylistCheckbox.checked);
+});
+
+// ---------- Placeholder rotativo: refuerza "cualquier plataforma" ----------
+
+const placeholderExamples = [
+    "https://www.youtube.com/watch?v=...",
+    "https://www.tiktok.com/@usuario/video/...",
+    "https://vimeo.com/...",
+    "https://soundcloud.com/artista/tema",
+    "https://twitter.com/usuario/status/...",
+    "https://www.instagram.com/reel/..."
+];
+
+let placeholderIndex = 0;
+
+function rotatePlaceholder() {
+    if (document.activeElement === urlInput || urlInput.value) return;
+    urlInput.placeholder = placeholderExamples[placeholderIndex];
+    placeholderIndex = (placeholderIndex + 1) % placeholderExamples.length;
+}
+
+rotatePlaceholder();
+setInterval(rotatePlaceholder, 2600);
+
+// ---------- Envío del formulario ----------
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        urlInput.focus();
+        return;
+    }
+
+    const isPlaylist = isPlaylistCheckbox.checked;
+    const limit = limitInput.value || 10;
+    const format = selectedFormat === "MP4";
+
+    startBtn.disabled = true;
+    progressLine.classList.add("active");
+
+    logBox.style.display = "block";
+    logBox.innerHTML = "";
+    appendLog(logBox, "Enviando petición...");
+
+    status.className = "status-badge running";
+    statusText.textContent = "Procesando en servidor...";
+
+    try {
+
+        const response = await fetch("/api/download", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                url,
+                isPlaylist,
+                limit,
+                format
+            })
+        });
+
+        const initData = await response.json();
+
+        if (initData.error) {
+
+            status.className = "status-badge error";
+            statusText.textContent = "Error";
+
+            appendLog(logBox, initData.error, true);
+
+            progressLine.classList.remove("active");
+            startBtn.disabled = false;
+
             return;
         }
 
-        startBtn.disabled = true;
-        progressLine.classList.add("active");
+        const eventSource = new EventSource(`/api/progress/${initData.downloadId}`);
 
-        logBox.style.display = "block";
-        logBox.innerHTML = "";
-        appendLog(logBox, "Enviando petición...");
+        eventSource.onmessage = (event) => {
 
-        status.className = "status-badge running";
-        statusText.textContent = "Procesando en servidor...";
+            const sseData = JSON.parse(event.data);
 
-        try {
-
-            const response = await fetch("/api/download", {
-                method: "POST",
-                headers: {
-                    "Content-Type":"application/json"
-                },
-                body: JSON.stringify({
-                    url,
-                    isPlaylist,
-                    limit,
-                    format
-                })
-            });
-
-            const initData = await response.json();
-
-            if (initData.error) {
-
-                status.className = "status-badge error";
-                statusText.textContent = "Error";
-
-                appendLog(logBox, initData.error, true);
-
-                progressLine.classList.remove("active");
-                startBtn.disabled = false;
-
-                return;
+            if (sseData.type === "log") {
+                appendLog(logBox, sseData.message);
             }
 
-            const eventSource = new EventSource(`/api/progress/${initData.downloadId}`);
+            if (sseData.type === "status") {
 
-            eventSource.onmessage = (event)=>{
+                if (sseData.status === "completed") {
 
-                const sseData = JSON.parse(event.data);
+                    status.className = "status-badge success";
+                    statusText.textContent = "¡Listo! Descargando archivo...";
 
-                if(sseData.type==="log"){
-                    appendLog(logBox,sseData.message);
-                }
+                    progressLine.classList.remove("active");
+                    startBtn.disabled = false;
+                    urlInput.value = "";
 
-                if(sseData.type==="status"){
+                    eventSource.close();
 
-                    if(sseData.status==="completed"){
+                    window.location.href = `/api/get-file/${initData.downloadId}`;
 
-                        status.className="status-badge success";
-                        statusText.textContent="¡Listo! Descargando archivo...";
+                } else {
 
-                        progressLine.classList.remove("active");
-                        startBtn.disabled=false;
-                        urlInput.value="";
+                    status.className = "status-badge error";
+                    statusText.textContent = "Falló la descarga";
 
-                        eventSource.close();
+                    progressLine.classList.remove("active");
+                    startBtn.disabled = false;
 
-                        window.location.href=`/api/get-file/${initData.downloadId}`;
-
-                    }else{
-
-                        status.className="status-badge error";
-                        statusText.textContent="Falló la descarga";
-
-                        progressLine.classList.remove("active");
-                        startBtn.disabled=false;
-
-                        eventSource.close();
-
-                    }
+                    eventSource.close();
 
                 }
 
-            };
+            }
 
-            eventSource.onerror=()=>{
+        };
 
-                status.className="status-badge error";
-                statusText.textContent="Se perdió la conexión con el servidor";
+        eventSource.onerror = () => {
 
-                progressLine.classList.remove("active");
-                startBtn.disabled=false;
-
-                eventSource.close();
-
-            };
-
-        } catch {
-
-            status.className="status-badge error";
-            statusText.textContent="Error de conexión";
-
-            appendLog(logBox,"No se pudo conectar al servidor.",true);
+            status.className = "status-badge error";
+            statusText.textContent = "Se perdió la conexión con el servidor";
 
             progressLine.classList.remove("active");
-            startBtn.disabled=false;
+            startBtn.disabled = false;
 
-        }
+            eventSource.close();
 
-    });
+        };
 
-});
+    } catch {
 
-document.querySelectorAll(".tab").forEach(tab => {
+        status.className = "status-badge error";
+        statusText.textContent = "Error de conexión";
 
-    tab.addEventListener("click", () => {
+        appendLog(logBox, "No se pudo conectar al servidor.", true);
 
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        progressLine.classList.remove("active");
+        startBtn.disabled = false;
 
-        tab.classList.add("active");
-        document.getElementById(tab.dataset.tab).classList.add("active");
-
-    });
+    }
 
 });
 
