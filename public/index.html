@@ -48,6 +48,44 @@
                 </div>
             </div>
 
+                        <div class="sidebar-group">
+                <h2>Audio &amp; música</h2>
+                <div class="sidebar-links">
+                    <a href="https://soundcloud.com" target="_blank" rel="noopener noreferrer">SoundCloud</a>
+                    <a href="https://bandcamp.com" target="_blank" rel="noopener noreferrer">Bandcamp</a>
+                    <a href="https://www.mixcloud.com" target="_blank" rel="noopener noreferrer">Mixcloud</a>
+                    <a href="https://audiomack.com" target="_blank" rel="noopener noreferrer">Audiomack</a>
+                    <a href="https://www.npr.org" target="_blank" rel="noopener noreferrer">NPR</a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <h2>Noticias &amp; medios</h2>
+                <div class="sidebar-links">
+                    <a href="https://www.bbc.com" target="_blank" rel="noopener noreferrer">BBC</a>
+                    <a href="https://www.cnn.com" target="_blank" rel="noopener noreferrer">CNN</a>
+                    <a href="https://www.bloomberg.com" target="_blank" rel="noopener noreferrer">Bloomberg</a>
+                    <a href="https://www.theguardian.com" target="_blank" rel="noopener noreferrer">The Guardian</a>
+                    <a href="https://www.cbsnews.com" target="_blank" rel="noopener noreferrer">CBS News</a>
+                    <a href="https://www.espn.com" target="_blank" rel="noopener noreferrer">ESPN</a>
+                    <a href="https://www.nbcnews.com" target="_blank" rel="noopener noreferrer">NBC</a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <h2>Y más</h2>
+                <div class="sidebar-links">
+                    <a href="https://rumble.com" target="_blank" rel="noopener noreferrer">Rumble</a>
+                    <a href="https://streamable.com" target="_blank" rel="noopener noreferrer">Streamable</a>
+                    <a href="https://www.bitchute.com" target="_blank" rel="noopener noreferrer">BitChute</a>
+                    <a href="https://www.bilibili.com" target="_blank" rel="noopener noreferrer">Bilibili</a>
+                    <a href="https://imgur.com" target="_blank" rel="noopener noreferrer">Imgur</a>
+                    <a href="https://9gag.com" target="_blank" rel="noopener noreferrer">9GAG</a>
+                </div>
+            </div>
+
+            <p class="sidebar-note">Consulte soporte para diversas plataformas</p>
+
         </aside>
 
         <main class="container">
@@ -181,45 +219,32 @@
 
         </main>
 
-        <aside class="sidebar sidebar-right" aria-label="Plataformas compatibles (audio, noticias y más)">
+        <aside class="sidebar sidebar-right" aria-label="Buscador de música">
 
-            <div class="sidebar-group">
-                <h2>Audio &amp; música</h2>
-                <div class="sidebar-links">
-                    <a href="https://soundcloud.com" target="_blank" rel="noopener noreferrer">SoundCloud</a>
-                    <a href="https://bandcamp.com" target="_blank" rel="noopener noreferrer">Bandcamp</a>
-                    <a href="https://www.mixcloud.com" target="_blank" rel="noopener noreferrer">Mixcloud</a>
-                    <a href="https://audiomack.com" target="_blank" rel="noopener noreferrer">Audiomack</a>
-                    <a href="https://www.npr.org" target="_blank" rel="noopener noreferrer">NPR</a>
+            <div class="search-card">
+
+                <div class="search-card-header">
+                    <h2>Buscar música</h2>
+                    <p>Buscá en YouTube y elegí un resultado para autocompletar el enlace</p>
                 </div>
-            </div>
 
-            <div class="sidebar-group">
-                <h2>Noticias &amp; medios</h2>
-                <div class="sidebar-links">
-                    <a href="https://www.bbc.com" target="_blank" rel="noopener noreferrer">BBC</a>
-                    <a href="https://www.cnn.com" target="_blank" rel="noopener noreferrer">CNN</a>
-                    <a href="https://www.bloomberg.com" target="_blank" rel="noopener noreferrer">Bloomberg</a>
-                    <a href="https://www.theguardian.com" target="_blank" rel="noopener noreferrer">The Guardian</a>
-                    <a href="https://www.cbsnews.com" target="_blank" rel="noopener noreferrer">CBS News</a>
-                    <a href="https://www.espn.com" target="_blank" rel="noopener noreferrer">ESPN</a>
-                    <a href="https://www.nbcnews.com" target="_blank" rel="noopener noreferrer">NBC</a>
-                </div>
-            </div>
+                <form class="search-form" id="searchForm">
+                    <input
+                        type="text"
+                        id="searchQuery"
+                        class="search-input"
+                        placeholder="Artista, canción..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button type="submit" class="search-btn" id="searchBtn">Buscar</button>
+                </form>
 
-            <div class="sidebar-group">
-                <h2>Y más</h2>
-                <div class="sidebar-links">
-                    <a href="https://rumble.com" target="_blank" rel="noopener noreferrer">Rumble</a>
-                    <a href="https://streamable.com" target="_blank" rel="noopener noreferrer">Streamable</a>
-                    <a href="https://www.bitchute.com" target="_blank" rel="noopener noreferrer">BitChute</a>
-                    <a href="https://www.bilibili.com" target="_blank" rel="noopener noreferrer">Bilibili</a>
-                    <a href="https://imgur.com" target="_blank" rel="noopener noreferrer">Imgur</a>
-                    <a href="https://9gag.com" target="_blank" rel="noopener noreferrer">9GAG</a>
-                </div>
-            </div>
+                <div class="search-status" id="searchStatus"></div>
 
-            <p class="sidebar-note">+ todo lo que soporte yt-dlp</p>
+                <div class="search-results" id="searchResults"></div>
+
+            </div>
 
         </aside>
 

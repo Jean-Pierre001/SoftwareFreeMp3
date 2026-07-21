@@ -5,10 +5,12 @@ const { downloadController } = require("../controllers/download.controller")
 const { channelSSEController } = require("../controllers/channelSSE.controller")
 const { getFileController } = require("../controllers/getFile.controller")
 const { downloadInformationController } = require("../controllers/downloadInformation.controller")
+const { searchSongController } = require("../controllers/searchSong.controller")
 
 router.get("/", indexController)
 router.post("/api/download", downloadController)
 router.post("/api/download-information", downloadInformationController)
+router.post("/api/search", searchSongController)
 router.get("/api/progress/:id", channelSSEController)
 router.get("/api/get-file/:id", getFileController)
 

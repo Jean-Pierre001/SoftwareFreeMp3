@@ -23,7 +23,7 @@ const inicializarServidorUtil = () => {
         console.log("COOKIES_PATH:", COOKIES_PATH);
         process.exit(1);    
     } else {
-        console.log("Ruta de yt-dlp.exe:", COOKIES_PATH);
+        console.log("Ruta de cookies.txt:", COOKIES_PATH);
     }
     
     if (!fs.existsSync(DOWNLOADS_PATH)) {
