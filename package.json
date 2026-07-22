@@ -38,6 +38,12 @@
 
     "win": {
       "target": "nsis"
+    },
+
+    "nsis": {
+      "oneClick": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
   },
 

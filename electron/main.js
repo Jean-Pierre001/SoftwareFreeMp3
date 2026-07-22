@@ -2,8 +2,12 @@ const { app, BrowserWindow } = require("electron")
 const path = require("path")
 const { PORT } = require("../src/config/config")
 
-// Inicia tu servidor Express
 require("../src/server")
+
+// Evita el error de "Unable to move the cache: Acceso denegado"
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache')
+app.commandLine.appendSwitch('disable-http-cache')
+app.disableHardwareAcceleration()
 
 function createWindow() {
 
