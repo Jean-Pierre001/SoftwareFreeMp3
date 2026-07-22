@@ -1,5 +1,5 @@
 const { spawn } = require("child_process")
-const { YTDLP_PATH, FFMPEG_PATH, COOKIES_PATH } = require("../config/config.js")
+const { YTDLP_PATH, FFMPEG_PATH } = require("../config/config.js")
 const { getPreviewStream } = require("../service/songPreview.service")
 
 const previewStreamController = (req, res) => {
@@ -35,7 +35,6 @@ const previewStreamController = (req, res) => {
 
     const ytDlp = spawn(YTDLP_PATH, [
         "--no-playlist",
-        "--cookies", COOKIES_PATH,
         "-f", formatArg,
         "-g",
         url
@@ -63,8 +62,8 @@ const previewStreamController = (req, res) => {
 
         // 2) cortamos el tramo exacto con ffmpeg y lo mandamos por stdout
         const ffmpegArgs = [
-            "-ss", String(start),
             "-i", resolvedUrl,
+            "-ss", String(start),
             "-t", String(clipDuration),
             "-vn",
         ]

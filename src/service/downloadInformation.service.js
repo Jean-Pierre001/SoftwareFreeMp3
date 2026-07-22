@@ -1,12 +1,11 @@
 const { spawn } = require("child_process")
-const { YTDLP_PATH, COOKIES_PATH } = require("../config/config.js")
+const { YTDLP_PATH } = require("../config/config.js")
 
 const downloadInformationService = (url) => {
 
     return new Promise((resolve, reject) => {
         const args = [
             "--dump-single-json",
-            "--cookies", COOKIES_PATH,
             "--no-playlist",
             url
         ]

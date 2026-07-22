@@ -1,4 +1,4 @@
-const { YTDLP_PATH, FFMPEG_PATH, DOWNLOADS_PATH, COOKIES_PATH } = require("../config/config.js")
+const { YTDLP_PATH, FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
 const fs = require("fs")
 
 const inicializarServidorUtil = () => {
@@ -16,14 +16,6 @@ const inicializarServidorUtil = () => {
         process.exit(1);
     } else {
         console.log("Ruta de ffmpeg.exe:", FFMPEG_PATH);
-    }
-
-    if (!fs.existsSync(COOKIES_PATH)) {
-        console.error("Archivo cookies.txt no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
-        console.log("COOKIES_PATH:", COOKIES_PATH);
-        process.exit(1);    
-    } else {
-        console.log("Ruta de cookies.txt:", COOKIES_PATH);
     }
     
     if (!fs.existsSync(DOWNLOADS_PATH)) {

@@ -1,5 +1,5 @@
 const { spawn } = require("child_process")
-const { YTDLP_PATH, COOKIES_PATH } = require("../config/config.js")
+const { YTDLP_PATH } = require("../config/config.js")
 
 const searchSongService = (query) => {
 
@@ -12,7 +12,6 @@ const searchSongService = (query) => {
         const args = [
             "--dump-single-json",
             "--no-playlist",
-            "--cookies", COOKIES_PATH,
             `ytsearch6:${query}`
         ]
 
