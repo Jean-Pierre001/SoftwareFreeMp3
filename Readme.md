@@ -84,7 +84,7 @@ Para utilizar yt-dlp con YouTube es necesario exportar las cookies de una cuenta
 Abrir YouTube con una cuenta iniciada.
 
 
-![Cookies 1.](./imgReadme/Cookies1.png)
+![Cookies 1.](./public/img/Cookies1.png)
 
 
 ## Paso 2
@@ -103,7 +103,7 @@ Esto generará un archivo:
 cookies.txt
 ```
 
-![Cookies 2.](./imgReadme/Cookies2.png)
+![Cookies 2.](./public/img/Cookies2.png)
 
 
 ## Paso 3
@@ -222,7 +222,7 @@ npm install
 
 ---
 
-# Estructura del proyecto
+# Estructura minimo y obligatoria del proyecto
 
 ```
 src/
