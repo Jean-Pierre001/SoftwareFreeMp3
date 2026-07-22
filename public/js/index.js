@@ -28,6 +28,12 @@ const trimStartTime = document.getElementById("trimStartTime");
 const trimEndTime = document.getElementById("trimEndTime");
 const trimSelectionLabel = document.getElementById("trimSelectionLabel");
 
+const trimPlayBtn = document.getElementById("trimPlayBtn");
+const trimPlayIcon = document.getElementById("trimPlayIcon");
+const trimPlayLabel = document.getElementById("trimPlayLabel");
+const trimAudio = document.getElementById("trimAudio");
+const trimVideo = document.getElementById("trimVideo");
+
 const searchForm = document.getElementById("searchForm");
 const searchQueryInput = document.getElementById("searchQuery");
 const searchBtn = document.getElementById("searchBtn");
@@ -37,6 +43,8 @@ const searchResults = document.getElementById("searchResults");
 let selectedFormat = "MP3";
 let trimInfo = null; // { duration, start, end }
 let trimLoadedForUrl = null;
+let currentPreviewId = null;
+let activeMedia = null; // referencia al <audio> o <video> activo
 
 const MIN_TRIM_GAP = 1; // segundos mínimos entre inicio y fin
 
@@ -47,6 +55,13 @@ formatBtns.forEach(btn => {
         formatBtns.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         selectedFormat = btn.dataset.format;
+
+        // si el panel de preview/recorte está abierto, hay que re-pedir el preview
+        // con el nuevo formato (el stream de audio y el de video son distintos)
+        if (trimToggle.checked && trimLoadedForUrl) {
+            currentPreviewId = null;
+            loadPreview();
+        }
     });
 });
 
@@ -66,7 +81,7 @@ isPlaylistCheckbox.addEventListener("change", () => {
 
 });
 
-// ---------- Panel de recorte ----------
+// ---------- Panel de previsualización + recorte ----------
 
 trimToggle.addEventListener("change", () => {
 
@@ -77,7 +92,7 @@ trimToggle.addEventListener("change", () => {
         limitField.classList.remove("open");
 
         trimPanel.classList.add("open");
-        loadTrimInfo();
+        loadPreview();
 
     } else {
 
@@ -88,18 +103,19 @@ trimToggle.addEventListener("change", () => {
 
 });
 
-trimRetryBtn.addEventListener("click", loadTrimInfo);
+trimRetryBtn.addEventListener("click", loadPreview);
 
 // si el enlace cambia después de haber cargado la info, invalida la caché
 urlInput.addEventListener("input", () => {
     if (urlInput.value.trim() !== trimLoadedForUrl) {
         trimLoadedForUrl = null;
         trimInfo = null;
+        currentPreviewId = null;
 
-    if (trimToggle.checked) {
-        trimToggle.checked = false;
-        trimToggle.dispatchEvent(new Event("change"));
-    }
+        if (trimToggle.checked) {
+            trimToggle.checked = false;
+            trimToggle.dispatchEvent(new Event("change"));
+        }
     }
 });
 
@@ -107,8 +123,11 @@ function closeTrimPanel() {
 
     trimPanel.classList.remove("open");
 
+    stopPreviewPlayback();
+
     trimInfo = null;
     trimLoadedForUrl = null;
+    currentPreviewId = null;
 
     // ocultar todos los estados del card
     trimLoading.classList.remove("active");
@@ -135,6 +154,11 @@ function closeTrimPanel() {
     trimRangeFill.style.width = "0%";
 
     trimSelectionLabel.textContent = "0 segundos seleccionados";
+
+    trimAudio.removeAttribute("src");
+    trimVideo.removeAttribute("src");
+    trimVideo.style.display = "none";
+    trimAudio.style.display = "none";
 }
 
 function showTrimState(state) {
@@ -142,7 +166,7 @@ function showTrimState(state) {
     state.classList.add("active");
 }
 
-async function loadTrimInfo() {
+async function loadPreview() {
 
     const url = urlInput.value.trim();
 
@@ -152,34 +176,36 @@ async function loadTrimInfo() {
         return;
     }
 
-    // ya la tenemos para este mismo enlace, no hace falta pedirla de nuevo
-    if (trimLoadedForUrl === url && trimInfo) {
+    // ya la tenemos para este mismo enlace y formato, no hace falta pedirla de nuevo
+    if (trimLoadedForUrl === url && trimInfo && currentPreviewId) {
         showTrimState(trimContent);
         return;
     }
 
     showTrimState(trimLoading);
+    stopPreviewPlayback();
 
     try {
 
-        const response = await fetch("/api/download-information", {
+        const response = await fetch("/api/preview", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ url })
+            body: JSON.stringify({ url, format: selectedFormat.toLowerCase() })
         });
 
         const data = await response.json();
 
-        if (!response.ok || data.error) {
-            throw new Error(data.error || "No se pudo obtener la información del video.");
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "No se pudo obtener la información del video.");
         }
 
         const duration = Math.max(1, Math.floor(data.duration || 0));
 
         trimInfo = { duration, start: 0, end: duration };
         trimLoadedForUrl = url;
+        currentPreviewId = data.previewId;
 
         trimThumb.src = data.thumbnail || "";
         trimThumb.alt = data.title || "Miniatura del video";
@@ -205,6 +231,60 @@ async function loadTrimInfo() {
     }
 
 }
+
+function getActiveMediaTag() {
+    return selectedFormat === "MP4" ? trimVideo : trimAudio;
+}
+
+function stopPreviewPlayback() {
+
+    if (activeMedia) {
+        activeMedia.pause();
+        activeMedia.removeEventListener("timeupdate", onPreviewTimeUpdate);
+    }
+
+    trimPlayIcon.textContent = "▶";
+    trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
+
+}
+
+function onPreviewTimeUpdate() {
+    if (activeMedia.currentTime >= trimInfo.end) {
+        stopPreviewPlayback();
+    }
+}
+
+trimPlayBtn.addEventListener("click", () => {
+
+    if (!currentPreviewId || !trimInfo) return;
+
+    if (activeMedia && !activeMedia.paused) {
+        activeMedia.pause();
+        activeMedia.currentTime = 0;
+        trimPlayIcon.textContent = "▶";
+        trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
+        return;
+    }
+
+    activeMedia = getActiveMediaTag();
+
+    const params = new URLSearchParams({
+        start: trimInfo.start,
+        end: trimInfo.end
+    });
+
+    activeMedia.src = `/api/preview-stream/${currentPreviewId}?${params}`;
+    activeMedia.play();
+
+    trimPlayIcon.textContent = "❚❚";
+    trimPlayLabel.textContent = "Reproduciendo...";
+
+    activeMedia.onended = () => {
+        trimPlayIcon.textContent = "▶";
+        trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
+    };
+
+});
 
 function formatSeconds(totalSeconds) {
     const s = Math.max(0, Math.round(totalSeconds));
@@ -242,6 +322,9 @@ function updateTrimSliderUI() {
         trimInfo.start = start;
         trimInfo.end = end;
     }
+
+    // si cambia el recorte mientras se reproduce, cortamos para que no se pase de rango
+    stopPreviewPlayback();
 
 }
 
@@ -517,7 +600,6 @@ form.addEventListener("submit", async (e) => {
                     startBtn.disabled = false;
                     urlInput.value = "";
 
-                    // 👇 esto es lo que faltaba
                     if (trimToggle.checked) {
                         trimToggle.checked = false;
                     }

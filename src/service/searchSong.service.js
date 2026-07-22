@@ -13,7 +13,7 @@ const searchSongService = (query) => {
             "--dump-single-json",
             "--no-playlist",
             "--cookies", COOKIES_PATH,
-            `ytsearch10:${query}`
+            `ytsearch6:${query}`
         ]
 
         const ytDlp = spawn(YTDLP_PATH, args)

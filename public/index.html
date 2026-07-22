@@ -131,7 +131,7 @@
                     <label class="option-check" id="trimCheckWrap">
                         <input type="checkbox" id="trimToggle">
                         <span class="check-box"></span>
-                        <span class="check-label">Recortar (elegir inicio y fin)</span>
+                        <span class="check-label">Previsualizar y recortar</span>
                     </label>
 
                 </div>
@@ -172,6 +172,16 @@
                                 <div class="trim-uploader" id="trimUploader"></div>
                             </div>
                         </div>
+
+                        <div class="trim-preview-row">
+                            <button type="button" class="trim-play-btn" id="trimPlayBtn" aria-label="Reproducir selección">
+                                <span id="trimPlayIcon">▶</span>
+                            </button>
+                            <span class="trim-play-label" id="trimPlayLabel">Escuchar el recorte seleccionado</span>
+                        </div>
+
+                        <audio id="trimAudio" preload="none"></audio>
+                        <video id="trimVideo" preload="none"></video>
 
                         <div class="trim-slider-wrap">
                             <div class="trim-track">
