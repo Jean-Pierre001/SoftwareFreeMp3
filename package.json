@@ -15,6 +15,7 @@
 
   "build": {
     "appId": "com.softwarefreemp3.app",
+    "icon": "build/icon.ico",
     "productName": "SoftwareFreeMP3",
 
     "directories": {

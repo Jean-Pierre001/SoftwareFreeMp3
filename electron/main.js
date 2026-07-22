@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require("electron")
 const path = require("path")
+const { PORT } = require("../src/config/config")
 
 // Inicia tu servidor Express
 require("../src/server")
@@ -8,7 +9,10 @@ function createWindow() {
 
     const win = new BrowserWindow({
 
-        fullscreen: true,
+        show: false,
+
+        icon: path.join(__dirname, "../build/icon.ico"),
+
         autoHideMenuBar: true,
 
         webPreferences: {
@@ -18,7 +22,12 @@ function createWindow() {
         }
     })
 
-    win.loadURL("http://localhost:8080")
+    win.loadURL(`http://localhost:${PORT}`)
+
+    win.once("ready-to-show", () => {
+        win.maximize()
+        win.show()
+    })
 }
 
 app.whenReady().then(() => {
