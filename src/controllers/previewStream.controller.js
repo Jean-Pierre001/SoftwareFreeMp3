@@ -19,23 +19,20 @@ const previewStreamController = async (req, res) => {
         })
     }
 
-    // si todavía se está descargando, esperamos ESA descarga
-    // (no relanzamos yt-dlp)
     if (entry.status !== "ready") {
+
         try {
             await entry.readyPromise
         } catch (err) {
-            if (!res.headersSent) {
-                return res.status(500).json({
-                    success: false,
-                    message: err.message
-                })
-            }
-            return
+            return res.status(500).json({
+                success: false,
+                message: err.message
+            })
         }
+
     }
 
-    if (!fs.existsSync(entry.filePath)) {
+    if (!entry.filePath || !fs.existsSync(entry.filePath)) {
         return res.status(500).end()
     }
 
@@ -99,21 +96,41 @@ const previewStreamController = async (req, res) => {
 
     ffmpegArgs.push("pipe:1")
 
-    const ffmpeg = spawn(FFMPEG_PATH, ffmpegArgs)
+    const ffmpeg = spawn(
+        FFMPEG_PATH,
+        ffmpegArgs
+    )
 
     ffmpeg.stdout.pipe(res)
 
     ffmpeg.stderr.on("data", d => {
-        console.error("ffmpeg:", d.toString())
+
+        const log = d.toString()
+
+        if (
+            !log.includes("size=") &&
+            !log.includes("time=") &&
+            !log.includes("speed=")
+        ) {
+            console.error("ffmpeg:", log)
+        }
+
     })
 
     req.on("close", () => {
-        ffmpeg.kill("SIGKILL")
+
+        if (!res.writableEnded) {
+            ffmpeg.kill("SIGKILL")
+        }
+
     })
 
     ffmpeg.on("error", () => {
-        if (!res.headersSent)
+
+        if (!res.headersSent) {
             res.status(500).end()
+        }
+
     })
 
 }

@@ -625,7 +625,13 @@ form.addEventListener("submit", async (e) => {
     const limit = limitInput.value || 10;
     const format = selectedFormat;
 
-    const payload = { url, isPlaylist, limit, format };
+    const payload = {
+        url,
+        isPlaylist,
+        limit,
+        format,
+        previewId: currentPreviewId
+    };
 
     if (trimToggle.checked && trimInfo) {
         payload.start = trimInfo.start;
