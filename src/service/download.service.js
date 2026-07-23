@@ -12,19 +12,14 @@ const sanitizeName = name => {
 }
 
 const downloadService = (url, format, start, end, previewId) => {
-
     const downloadId = Date.now().toString()
-
     let fileName = "download"
 
     if (previewId) {
-
         const preview = getPreviewStream(previewId)
-
         if (preview?.title) {
             fileName = sanitizeName(preview.title)
         }
-
     }
 
     const outputPath = path.join(
@@ -32,151 +27,106 @@ const downloadService = (url, format, start, end, previewId) => {
         `[${downloadId}]-${fileName}.${format === "MP3" ? "mp3" : "mp4"}`
     )
 
+    // --- PROCESAMIENTO CON PREVIEW CACHE (FFMPEG) ---
     if (previewId) {
-
         const preview = getPreviewStream(previewId)
 
         if (preview && preview.status === "ready" && preview.filePath) {
+            const ffmpegArgs = []
 
-            const ffmpegArgs = [
-                "-i",
-                preview.filePath
-            ]
-
+            // Fast Seek: colocar -ss antes de -i para que sea instantáneo
             if (start && end) {
-                ffmpegArgs.push(
-                    "-ss",
-                    String(start),
-                    "-to",
-                    String(end)
-                )
+                ffmpegArgs.push("-ss", String(start), "-to", String(end))
             }
 
-            if (format === "MP3") {
+            ffmpegArgs.push("-i", preview.filePath)
 
+            if (format === "MP3") {
                 ffmpegArgs.push(
                     "-vn",
-                    "-c:a",
-                    "libmp3lame",
-                    "-q:a",
-                    "0"
+                    "-c:a", "libmp3lame",
+                    "-q:a", "0" // Máxima calidad VBR
                 )
-
             } else {
-
                 ffmpegArgs.push(
-                    "-c:v",
-                    "libx264",
-                    "-c:a",
-                    "aac",
-                    "-movflags",
-                    "+faststart"
+                    "-c:v", "libx264",
+                    "-crf", "18", // CRF 18 = Calidad visualmente sin pérdida (Visually Lossless)
+                    "-preset", "preset_or_fast", // Mantén balance velocidad/tamaño
+                    "-c:a", "aac",
+                    "-b:a", "320k", // Máximo bitrate de audio AAC
+                    "-movflags", "+faststart"
                 )
-
             }
 
             ffmpegArgs.push(outputPath)
 
-            const ffmpeg = spawn(
-                FFMPEG_PATH,
-                ffmpegArgs
-            )
+            const ffmpeg = spawn(FFMPEG_PATH, ffmpegArgs)
 
             activeDownloadsUtil.set(downloadId, {
                 process: ffmpeg,
                 status: "downloading",
-                logs: [
-                    "Generando archivo desde preview cache..."
-                ]
+                logs: ["Generando archivo desde preview cache..."]
             })
 
             ffmpeg.stderr.on("data", d => {
-
                 const text = d.toString()
-
                 if (!text.includes("time=")) {
                     console.log("[FFMPEG]", text)
                 }
-
             })
 
             ffmpeg.on("close", code => {
-
                 const state = activeDownloadsUtil.get(downloadId)
-
                 if (code === 0) {
-
                     activeDownloadsUtil.set(downloadId, {
                         ...state,
                         status: "completed",
                         filePath: outputPath
                     })
-
                 } else {
-
                     activeDownloadsUtil.set(downloadId, {
                         ...state,
                         status: "error"
                     })
-
                 }
-
             })
 
             ffmpeg.on("error", err => {
-
                 activeDownloadsUtil.set(downloadId, {
                     ...activeDownloadsUtil.get(downloadId),
                     status: "error",
                     error: err.message
                 })
-
             })
 
             return downloadId
-
         }
-
     }
 
-
+    // --- DESCARGA DIRECTA (YT-DLP) ---
     let formatArgs = []
 
     if (format === "MP3") {
-
         formatArgs = [
             "-x",
-            "--audio-format",
-            "mp3",
-            "--audio-quality",
-            "0"
+            "--audio-format", "mp3",
+            "--audio-quality", "0"
         ]
-
     } else {
-
         formatArgs = [
-            "-f",
-            "bv*+ba/b",
-            "--merge-output-format",
-            "mp4",
-            "--remux-video",
-            "mp4"
+            // Selecciona la mejor calidad posible de vídeo y audio combinados
+            "-f", "bestvideo+bestaudio/best",
+            "--merge-output-format", "mp4"
         ]
-
     }
 
-
     let trimArgs = []
-
     if (start && end) {
-
         trimArgs = [
             "--download-sections",
             `*${start}-${end}`
         ]
-
     }
-
 
     const outputTemplate = path.join(
         DOWNLOADS_PATH,
@@ -185,46 +135,23 @@ const downloadService = (url, format, start, end, previewId) => {
 
     const args = [
         url,
-
         ...formatArgs,
         ...trimArgs,
-
-        "--cookies",
-        COOKIES_PATH,
-
-        "--ffmpeg-location",
-        FFMPEG_PATH,
-
-        "--user-agent",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/139.0.0.0 Safari/537.36",
-
+        "--cookies", COOKIES_PATH,
+        "--ffmpeg-location", FFMPEG_PATH,
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/139.0.0.0 Safari/537.36",
         "--no-playlist",
-
         "--force-ipv4",
-
-        "--retries",
-        "10",
-
-        "--fragment-retries",
-        "10",
-
-        "--concurrent-fragments",
-        "8",
-
+        "--retries", "10",
+        "--fragment-retries", "10",
+        "--concurrent-fragments", "8",
         "--newline",
-
-        "--output",
-        outputTemplate
+        "--output", outputTemplate
     ]
 
-    ytDlpProcessUtil(
-        downloadId,
-        args,
-        url
-    )
+    ytDlpProcessUtil(downloadId, args, url)
 
     return downloadId
-
 }
 
 module.exports = {
