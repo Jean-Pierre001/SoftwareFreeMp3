@@ -1,6 +1,6 @@
 {
   "name": "softwarefreemp3",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Aplicacion de escritorio para descargar de multimedia de paginas webs como youtube",
   "main": "electron/main.js",
   "scripts": {
@@ -12,11 +12,18 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-
   "build": {
     "appId": "com.softwarefreemp3.app",
-    "icon": "build/icon.ico",
     "productName": "SoftwareFreeMP3",
+    "icon": "build/icon.ico",
+
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Jean-Pierre001",
+        "repo": "SoftwareFreeMp3"
+      }
+    ],
 
     "directories": {
       "output": "dist"
@@ -33,6 +40,10 @@
       {
         "from": "src/bin",
         "to": "bin"
+      },
+      {
+        "from": "node_modules/ffmpeg-static/ffmpeg.exe",
+        "to": "ffmpeg/ffmpeg.exe"
       }
     ],
 
@@ -43,16 +54,16 @@
     "nsis": {
       "oneClick": false,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "allowToChangeInstallationDirectory": true
     }
   },
-
   "dependencies": {
     "archiver": "^8.0.0",
+    "electron-updater": "^6.8.9",
     "express": "^5.2.1",
     "ffmpeg-static": "^5.3.0"
   },
-
   "devDependencies": {
     "electron": "^43.2.0",
     "electron-builder": "^26.15.3"

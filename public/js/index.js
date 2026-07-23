@@ -659,3 +659,53 @@ function appendLog(logBox, message, isError = false) {
     logBox.appendChild(line);
     logBox.scrollTop = logBox.scrollHeight;
 }
+
+const modal = document.getElementById("update-modal")
+
+const progressBar = document.getElementById("progress-bar")
+
+const progressText = document.getElementById("progress-text")
+
+const updateText = document.getElementById("update-text")
+
+const updateButton = document.getElementById("update-button")
+
+window.electron.onUpdateAvailable(() => {
+
+    modal.classList.remove("hidden")
+
+    updateText.textContent = "Descargando actualización..."
+
+})
+
+window.electron.onDownloadProgress(progress => {
+
+    progressBar.style.width = `${progress.percent}%`
+
+    progressText.textContent = `${progress.percent.toFixed(1)}%`
+
+})
+
+window.electron.onUpdateDownloaded(() => {
+
+    updateText.textContent = "La actualización está lista."
+
+    progressBar.style.width = "100%"
+
+    progressText.textContent = "100%"
+
+    updateButton.disabled = false
+
+})
+
+window.electron.onUpdateError(error => {
+
+    updateText.textContent = error
+
+})
+
+updateButton.onclick = () => {
+
+    window.electron.installUpdate()
+
+}
