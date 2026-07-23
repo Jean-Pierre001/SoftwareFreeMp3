@@ -806,7 +806,29 @@ updateButton.onclick = () => {
 
 // ---------- Login YouTube ----------
 
+const youtubeStatus = document.getElementById("youtubeStatus")
 const youtubeLoginBtn = document.getElementById("youtubeLoginBtn")
+
+async function checkYoutubeStatus(){
+
+    if(!youtubeStatus) return
+
+    try{
+        const response = await fetch("/api/youtube-status")
+        const data = await response.json()
+
+        if(data.connected){
+            youtubeStatus.className = "youtube-status connected"
+            youtubeStatus.textContent = "✓ YouTube conectado"
+        }else{
+            youtubeStatus.className = "youtube-status disconnected"
+            youtubeStatus.textContent = "✕ YouTube no conectado"
+        }
+    }catch{
+        youtubeStatus.className = "youtube-status disconnected"
+        youtubeStatus.textContent = "✕ YouTube no conectado"
+    }
+}
 
 if (youtubeLoginBtn) {
 
@@ -814,23 +836,17 @@ if (youtubeLoginBtn) {
 
         window.electron.openYoutubeLogin()
 
-    })
+        setTimeout(async () => {
+            const path = await window.electron.saveYoutubeCookies()
 
+            console.log(
+                "Archivo creado:",
+                path
+            )
+
+            checkYoutubeStatus()
+        }, 30000)
+    })
 }
 
-youtubeLoginBtn.addEventListener("click", async () => {
-
-    window.electron.openYoutubeLogin()
-
-    setTimeout(async () => {
-
-        const path = await window.electron.saveYoutubeCookies()
-
-        console.log(
-            "Archivo creado:",
-            path
-        )
-
-    }, 30000)
-
-})
+checkYoutubeStatus()

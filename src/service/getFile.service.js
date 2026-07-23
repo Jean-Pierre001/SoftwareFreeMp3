@@ -89,7 +89,7 @@ const getFileService = async (downloadId) => {
             message: "El archivo o carpeta física no existe."
         };
     }
-
+    
     const stats = fs.statSync(itemPath);
     let filePath = itemPath;
     let clientName = targetFiles[0].replace(`[${downloadId}]-`, "");

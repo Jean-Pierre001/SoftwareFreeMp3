@@ -32,12 +32,18 @@ body {
 }
 
 header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
     padding: 20px 32px;
     border-bottom: 1px solid var(--border);
     background-color: var(--surface);
+}
+
+.header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
 }
 
 .brand {
@@ -47,13 +53,16 @@ header {
     letter-spacing: -0.02em;
 }
 
-.brand span { color: var(--accent); }
+.brand span {
+    color: var(--accent);
+}
 
 .brand-tag {
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--text-muted);
     letter-spacing: 0.02em;
+    text-align: right;
 }
 
 .container {
@@ -1044,6 +1053,24 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     cursor:not-allowed;
 
+}
+
+.youtube-status{
+    padding:7px 12px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.youtube-status.connected{
+    background:#1f8f4a;
+    color:white;
+}
+
+.youtube-status.disconnected{
+    background:#b3261e;
+    color:white;
 }
 
 .log-line.err { color: var(--danger); }
