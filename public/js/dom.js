@@ -50,3 +50,4 @@ export const updateText = document.getElementById("update-text");
 export const updateButton = document.getElementById("update-button");
 
 export const youtubeStatus = document.getElementById("youtubeStatus");
+export const youtubeLoginBtn = document.getElementById("youtubeLoginBtn");

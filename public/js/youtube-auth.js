@@ -1,6 +1,6 @@
 // ---------- Login YouTube ----------
 
-import { youtubeStatus} from "./dom.js";
+import { youtubeStatus, youtubeLoginBtn } from "./dom.js";
 
 async function checkYoutubeStatus(){
 
@@ -21,6 +21,25 @@ async function checkYoutubeStatus(){
         youtubeStatus.className = "youtube-status disconnected"
         youtubeStatus.textContent = "✕ YouTube no conectado"
     }
+}
+
+if (youtubeLoginBtn) {
+
+    youtubeLoginBtn.addEventListener("click", () => {
+
+        window.electron.openYoutubeLogin()
+
+        setTimeout(async () => {
+            const path = await window.electron.saveYoutubeCookies()
+
+            console.log(
+                "Archivo creado:",
+                path
+            )
+
+            checkYoutubeStatus()
+        }, 30000)
+    })
 }
 
 checkYoutubeStatus()
