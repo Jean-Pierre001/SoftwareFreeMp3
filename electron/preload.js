@@ -21,6 +21,12 @@ contextBridge.exposeInMainWorld("electron", {
         ipcRenderer.send("install-update"),
 
     checkForUpdates: () =>
-        ipcRenderer.send("check-for-updates")
+        ipcRenderer.send("check-for-updates"),
+
+    openYoutubeLogin: () =>
+        ipcRenderer.send("open-youtube-login"),
+
+    saveYoutubeCookies: () =>
+        ipcRenderer.invoke("save-youtube-cookies")
 
 })

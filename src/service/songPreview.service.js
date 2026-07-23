@@ -1,6 +1,6 @@
 const { spawn } = require("child_process")
 const crypto = require("crypto")
-const { YTDLP_PATH } = require("../config/config.js")
+const { YTDLP_PATH, COOKIES_PATH } = require("../config/config.js")
 
 const previewCache = new Map()
 const PREVIEW_TTL = 1000 * 60 * 30 // 30 min
@@ -21,7 +21,8 @@ const songPreviewService = (url, format) => {
         const args = [
             "--dump-single-json",
             "--no-playlist",
-            "--cookies-from-browser",
+            "--cookies",
+            COOKIES_PATH,
             url
         ]
 

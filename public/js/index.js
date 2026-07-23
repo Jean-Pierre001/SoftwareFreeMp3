@@ -709,3 +709,34 @@ updateButton.onclick = () => {
     window.electron.installUpdate()
 
 }
+
+// ---------- Login YouTube ----------
+
+const youtubeLoginBtn = document.getElementById("youtubeLoginBtn")
+
+if (youtubeLoginBtn) {
+
+    youtubeLoginBtn.addEventListener("click", () => {
+
+        window.electron.openYoutubeLogin()
+
+    })
+
+}
+
+youtubeLoginBtn.addEventListener("click", async () => {
+
+    window.electron.openYoutubeLogin()
+
+    setTimeout(async () => {
+
+        const path = await window.electron.saveYoutubeCookies()
+
+        console.log(
+            "Archivo creado:",
+            path
+        )
+
+    }, 30000)
+
+})

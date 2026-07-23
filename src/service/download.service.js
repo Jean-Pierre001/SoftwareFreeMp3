@@ -1,6 +1,6 @@
 const path = require("path")
 const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
-const { FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
+const { FFMPEG_PATH, DOWNLOADS_PATH, COOKIES_PATH } = require("../config/config.js")
 
 const downloadService = (url, format, start, end) => {
 
@@ -42,7 +42,8 @@ const downloadService = (url, format, start, end) => {
         ...formatArgs,
         ...trimArgs,
 
-        "--cookies-from-browser",
+        "--cookies",
+        COOKIES_PATH,
 
         "--ffmpeg-location", FFMPEG_PATH,
 

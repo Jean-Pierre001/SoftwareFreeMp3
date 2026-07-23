@@ -1,8 +1,14 @@
 const path = require("path")
+const { app } = require("electron")
 const fs = require("fs")
 const ffmpegStatic = require("ffmpeg-static")
 
 const PORT = process.env.PORT || 8080
+
+const COOKIES_PATH = path.join(
+    app.getPath("userData"),
+    "youtube-cookies.txt"
+)
 
 let BASE_PATH
 
@@ -19,6 +25,8 @@ if (process.versions.electron) {
     BASE_PATH = path.join(__dirname, "..")
 
 }
+
+
 
 const DOWNLOADS_PATH = path.join(BASE_PATH, "tempDownloads")
 
@@ -69,5 +77,6 @@ module.exports = {
     PORT,
     YTDLP_PATH,
     FFMPEG_PATH,
-    DOWNLOADS_PATH
+    DOWNLOADS_PATH,
+    COOKIES_PATH
 }

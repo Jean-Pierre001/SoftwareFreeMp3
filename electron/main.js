@@ -1,16 +1,16 @@
-const { app, BrowserWindow, ipcMain } = require("electron")
+const { app, BrowserWindow, ipcMain, session } = require("electron")
 const { autoUpdater } = require("electron-updater")
 const path = require("path")
 const { PORT } = require("../src/config/config")
 
 require("../src/server")
 
-// Evita el error de "Unable to move the cache: Acceso denegado"
 app.commandLine.appendSwitch("disable-gpu-shader-disk-cache")
 app.commandLine.appendSwitch("disable-http-cache")
 app.disableHardwareAcceleration()
 
 let win
+let youtubeLoginWindow
 
 function createWindow() {
 
@@ -37,10 +37,67 @@ function createWindow() {
         win.maximize()
         win.show()
 
-        // Buscar actualizaciones
         autoUpdater.checkForUpdates()
 
     })
+
+}
+
+function createYoutubeLoginWindow() {
+
+    if (youtubeLoginWindow) {
+
+        youtubeLoginWindow.focus()
+        return
+
+    }
+
+    youtubeLoginWindow = new BrowserWindow({
+
+        width: 500,
+        height: 700,
+
+        title: "Iniciar sesión YouTube",
+
+        webPreferences: {
+
+            partition: "persist:youtube-session",
+
+            contextIsolation: true,
+            nodeIntegration: false
+
+        }
+
+    })
+
+    youtubeLoginWindow.loadURL(
+        "https://www.youtube.com"
+    )
+
+    youtubeLoginWindow.on("closed", () => {
+
+        youtubeLoginWindow = null
+
+    })
+
+}
+
+async function getYoutubeCookies() {
+
+    const youtubeSession = session.fromPartition(
+        "persist:youtube-session"
+    )
+
+    const cookies = await youtubeSession.cookies.get({
+        domain: ".youtube.com"
+    })
+
+    console.log(
+        "Cookies encontradas:",
+        cookies.length
+    )
+
+    return cookies
 
 }
 
@@ -63,10 +120,6 @@ app.on("window-all-closed", () => {
         app.quit()
 
 })
-
-/* ===========================
-        AUTO UPDATER
-=========================== */
 
 autoUpdater.autoDownload = true
 autoUpdater.autoInstallOnAppQuit = false
@@ -116,17 +169,12 @@ autoUpdater.on("update-downloaded", info => {
 autoUpdater.on("error", err => {
 
     console.error("Error del actualizador")
-
     console.error(err)
 
     if (win)
         win.webContents.send("update-error", err.message)
 
 })
-
-/* ===========================
-            IPC
-=========================== */
 
 ipcMain.on("install-update", () => {
 
@@ -137,5 +185,21 @@ ipcMain.on("install-update", () => {
 ipcMain.on("check-for-updates", () => {
 
     autoUpdater.checkForUpdates()
+
+})
+
+ipcMain.on("open-youtube-login", () => {
+
+    createYoutubeLoginWindow()
+
+})
+
+ipcMain.handle("save-youtube-cookies", async () => {
+
+    const {
+        saveYoutubeCookies
+    } = require("../src/service/youtubeCookies.service")
+
+    return await saveYoutubeCookies()
 
 })
