@@ -16,32 +16,29 @@ const downloadPlaylistService = (url, limit, format) => {
 
     if (format === "MP3") { 
         formatArgs = [
-            "-x", // Equivalente corto y limpio de --extract-audio
+            "--extract-audio",
             "--audio-format", "mp3",
-            "--audio-quality", "0" // Máxima calidad VBR (LAME V0)
+            "--audio-quality", "0"
         ]
     } else {
         formatArgs = [
-            // Mejor calidad absoluta de vídeo + audio sin re-encodear
-            "-f", "bestvideo+bestaudio/best",
-            "--merge-output-format", "mp4"
+            "-f", "bv*+ba/b",
+            "--merge-output-format", "mp4",
+            "--remux-video", "mp4"
         ]
-    }
-
-    let playlistArgs = ["--yes-playlist"]
-    if (limit) {
-        playlistArgs.push("--playlist-end", String(limit))
     }
 
     const args = [
         url,
 
         ...formatArgs,
-        ...playlistArgs,
+
+        "--playlist-end", limit,
 
         "--ffmpeg-location", FFMPEG_PATH,
 
-        "--cookies", COOKIES_PATH,
+        "--cookies",
+        COOKIES_PATH,
 
         "--user-agent",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
