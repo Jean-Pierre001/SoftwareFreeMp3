@@ -1,17 +1,45 @@
 const { spawn } = require("child_process")
-const { YTDLP_PATH, FFMPEG_PATH, COOKIES_PATH } = require("../config/config.js")
+const fs = require("fs")
+const { FFMPEG_PATH } = require("../config/config.js")
 const { getPreviewStream } = require("../service/songPreview.service")
 
-const previewStreamController = (req, res) => {
+const previewStreamController = async (req, res) => {
 
     const { previewId } = req.params
-    const stream = getPreviewStream(previewId)
+    const entry = getPreviewStream(previewId)
 
-    if (!stream) {
+    if (!entry) {
         return res.status(404).end()
     }
 
-    const { url, format, duration } = stream
+    if (entry.status === "error") {
+        return res.status(500).json({
+            success: false,
+            message: "Falló la preparación del audio/video"
+        })
+    }
+
+    // si todavía se está descargando, esperamos ESA descarga
+    // (no relanzamos yt-dlp)
+    if (entry.status !== "ready") {
+        try {
+            await entry.readyPromise
+        } catch (err) {
+            if (!res.headersSent) {
+                return res.status(500).json({
+                    success: false,
+                    message: err.message
+                })
+            }
+            return
+        }
+    }
+
+    if (!fs.existsSync(entry.filePath)) {
+        return res.status(500).end()
+    }
+
+    const { format, duration, filePath } = entry
 
     let start = Number(req.query.start)
     let end = Number(req.query.end)
@@ -31,33 +59,14 @@ const previewStreamController = (req, res) => {
 
     res.setHeader("Cache-Control", "no-store")
 
-
-    const formatArg = format === "mp4"
-        ? "best[ext=mp4][height<=480]/best[height<=480]"
-        : "bestaudio[ext=m4a]/bestaudio"
-
-
-    const ytDlp = spawn(YTDLP_PATH, [
-        "--no-playlist",
-        "--cookies",
-        COOKIES_PATH,
-        "-f",
-        formatArg,
-        "-o",
-        "-",
-        url
-    ])
-
-
     const ffmpegArgs = [
-        "-i",
-        "pipe:0",
         "-ss",
         String(start),
+        "-i",
+        filePath,
         "-t",
         String(clipDuration)
     ]
-
 
     if (format === "mp4") {
 
@@ -88,62 +97,26 @@ const previewStreamController = (req, res) => {
 
     }
 
-
     ffmpegArgs.push("pipe:1")
 
-
-    const ffmpeg = spawn(
-        FFMPEG_PATH,
-        ffmpegArgs
-    )
-
-
-    ytDlp.stdout.pipe(ffmpeg.stdin)
+    const ffmpeg = spawn(FFMPEG_PATH, ffmpegArgs)
 
     ffmpeg.stdout.pipe(res)
 
-
-    ytDlp.stderr.on("data", d => {
-        console.error(
-            "yt-dlp:",
-            d.toString()
-        )
-    })
-
-
     ffmpeg.stderr.on("data", d => {
-        console.error(
-            "ffmpeg:",
-            d.toString()
-        )
+        console.error("ffmpeg:", d.toString())
     })
-
 
     req.on("close", () => {
-
-        ytDlp.kill("SIGKILL")
         ffmpeg.kill("SIGKILL")
-
     })
-
-
-    ytDlp.on("error", () => {
-
-        if (!res.headersSent)
-            res.status(500).end()
-
-    })
-
 
     ffmpeg.on("error", () => {
-
         if (!res.headersSent)
             res.status(500).end()
-
     })
 
 }
-
 
 module.exports = {
     previewStreamController

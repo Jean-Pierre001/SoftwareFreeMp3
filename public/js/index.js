@@ -232,41 +232,117 @@ async function loadPreview() {
 
 }
 
+let mediaState = "idle"; // idle | loading | playing | buffering
+
+function setPlayButtonState(state) {
+
+    mediaState = state;
+
+    trimPlayBtn.classList.toggle("loading", state === "loading");
+    trimPlayBtn.disabled = state === "loading";
+
+    switch (state) {
+
+        case "loading":
+            trimPlayLabel.textContent = "Preparando...";
+            break;
+
+        case "buffering":
+            trimPlayIcon.textContent = "❚❚";
+            trimPlayLabel.textContent = "Cargando...";
+            break;
+
+        case "playing":
+            trimPlayIcon.textContent = "❚❚";
+            trimPlayLabel.textContent = "Reproduciendo...";
+            break;
+
+        default:
+            trimPlayIcon.textContent = "▶";
+            trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
+
+    }
+
+}
+
 function getActiveMediaTag() {
     return selectedFormat === "MP4" ? trimVideo : trimAudio;
+}
+
+function onPreviewCanPlay() {
+    if (mediaState === "loading") setPlayButtonState("playing");
+}
+
+function onPreviewWaiting() {
+    // se cortó el buffer a mitad de reproducción (el stream sigue transcodeando)
+    if (mediaState === "playing") setPlayButtonState("buffering");
+}
+
+function onPreviewPlaying() {
+    if (mediaState === "loading" || mediaState === "buffering") {
+        setPlayButtonState("playing");
+    }
+}
+
+function onPreviewError() {
+    setPlayButtonState("idle");
+    trimPlayLabel.textContent = "No se pudo reproducir";
+}
+
+function onPreviewEnded() {
+    stopPreviewPlayback();
+}
+
+function onPreviewTimeUpdate() {
+    if (activeMedia && activeMedia.currentTime >= trimInfo.end) {
+        stopPreviewPlayback();
+    }
+}
+
+function detachMediaListeners(media) {
+    media.removeEventListener("canplay", onPreviewCanPlay);
+    media.removeEventListener("waiting", onPreviewWaiting);
+    media.removeEventListener("playing", onPreviewPlaying);
+    media.removeEventListener("timeupdate", onPreviewTimeUpdate);
+    media.removeEventListener("error", onPreviewError);
+    media.removeEventListener("ended", onPreviewEnded);
 }
 
 function stopPreviewPlayback() {
 
     if (activeMedia) {
         activeMedia.pause();
-        activeMedia.removeEventListener("timeupdate", onPreviewTimeUpdate);
-    }
-
-    trimPlayIcon.textContent = "▶";
-    trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
-
-}
-
-function onPreviewTimeUpdate() {
-    if (activeMedia.currentTime >= trimInfo.end) {
-        stopPreviewPlayback();
-    }
-}
-
-trimPlayBtn.addEventListener("click", () => {
-
-    if (!currentPreviewId || !trimInfo) return;
-
-    if (activeMedia && !activeMedia.paused) {
-        activeMedia.pause();
         activeMedia.currentTime = 0;
-        trimPlayIcon.textContent = "▶";
-        trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
-        return;
+        detachMediaListeners(activeMedia);
+        activeMedia.style.display = "none";
     }
 
-    activeMedia = getActiveMediaTag();
+    setPlayButtonState("idle");
+
+}
+
+function startPreviewPlayback() {
+
+    const media = getActiveMediaTag();
+    const otherMedia = media === trimVideo ? trimAudio : trimVideo;
+
+    // por si quedó algo cargado del otro formato
+    otherMedia.pause();
+    detachMediaListeners(otherMedia);
+    otherMedia.removeAttribute("src");
+    otherMedia.style.display = "none";
+
+    activeMedia = media;
+    activeMedia.style.display = selectedFormat === "MP4" ? "block" : "none";
+
+    setPlayButtonState("loading");
+
+    activeMedia.addEventListener("canplay", onPreviewCanPlay);
+    activeMedia.addEventListener("waiting", onPreviewWaiting);
+    activeMedia.addEventListener("playing", onPreviewPlaying);
+    activeMedia.addEventListener("timeupdate", onPreviewTimeUpdate);
+    activeMedia.addEventListener("error", onPreviewError);
+    activeMedia.addEventListener("ended", onPreviewEnded);
 
     const params = new URLSearchParams({
         start: trimInfo.start,
@@ -274,15 +350,27 @@ trimPlayBtn.addEventListener("click", () => {
     });
 
     activeMedia.src = `/api/preview-stream/${currentPreviewId}?${params}`;
-    activeMedia.play();
+    activeMedia.load();
 
-    trimPlayIcon.textContent = "❚❚";
-    trimPlayLabel.textContent = "Reproduciendo...";
+    activeMedia.play().catch(() => {
+        // algunos navegadores rechazan el play() si todavía no hay datos suficientes;
+        // los eventos canplay/waiting/error ya reflejan el estado real, así que lo ignoramos
+    });
 
-    activeMedia.onended = () => {
-        trimPlayIcon.textContent = "▶";
-        trimPlayLabel.textContent = "Escuchar el recorte seleccionado";
-    };
+}
+
+trimPlayBtn.addEventListener("click", () => {
+
+    if (!currentPreviewId || !trimInfo) return;
+
+    if (mediaState === "loading") return; // todavía preparando, no reaccionamos a doble click
+
+    if (mediaState === "playing" || mediaState === "buffering") {
+        stopPreviewPlayback();
+        return;
+    }
+
+    startPreviewPlayback();
 
 });
 

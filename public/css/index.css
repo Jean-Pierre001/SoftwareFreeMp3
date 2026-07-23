@@ -660,6 +660,29 @@ input[type="number"]:focus {
     color: var(--text-muted);
 }
 
+.trim-play-btn:disabled {
+    cursor: wait;
+    opacity: 0.8;
+}
+
+.trim-play-btn .btn-spinner {
+    display: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 2px solid rgba(10, 10, 12, 0.25);
+    border-top-color: #0a0a0c;
+    animation: spin 0.7s linear infinite;
+}
+
+.trim-play-btn.loading #trimPlayIcon {
+    display: none;
+}
+
+.trim-play-btn.loading .btn-spinner {
+    display: inline-block;
+}
+
 #trimAudio { display: none; }
 
 #trimVideo {
