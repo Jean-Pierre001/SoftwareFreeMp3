@@ -42,6 +42,8 @@ const downloadService = (url, format, start, end) => {
         ...formatArgs,
         ...trimArgs,
 
+        "--cookies-from-browser",
+
         "--ffmpeg-location", FFMPEG_PATH,
 
         "--user-agent",

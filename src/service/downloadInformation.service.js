@@ -7,6 +7,7 @@ const downloadInformationService = (url) => {
         const args = [
             "--dump-single-json",
             "--no-playlist",
+            "--cookies-from-browser",
             url
         ]
 

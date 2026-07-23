@@ -21,6 +21,7 @@ const songPreviewService = (url, format) => {
         const args = [
             "--dump-single-json",
             "--no-playlist",
+            "--cookies-from-browser",
             url
         ]
 
