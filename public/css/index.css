@@ -335,10 +335,18 @@ h1 {
     text-overflow: ellipsis;
 }
 
+.search-results {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
 .search-results::-webkit-scrollbar { width: 6px; }
+.search-results::-webkit-scrollbar-track { background-color: transparent; }
 .search-results::-webkit-scrollbar-thumb {
     background-color: var(--border);
     border-radius: 4px;
+}
+.search-results::-webkit-scrollbar-thumb:hover {
+    background-color: #3a3a42;
 }
 
 /* ---------- Panel / formulario ---------- */
@@ -1080,6 +1088,53 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
     to { opacity: 1; }
 }
 
+/* ---------- Scrollbars minimalistas ---------- */
+
+/* Firefox: aplica a todo el documento y a cualquier contenedor con overflow */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+/* Chrome / Edge / Safari: scrollbar global (html, body y cualquier div con overflow) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #3a3a42;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.log-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+.log-container::-webkit-scrollbar { width: 6px; }
+.log-container::-webkit-scrollbar-track { background-color: transparent; }
+.log-container::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 4px;
+}
+.log-container::-webkit-scrollbar-thumb:hover {
+    background-color: #3a3a42;
+}
+
 /* ---------- Accesibilidad / responsive ---------- */
 
 :focus-visible {
@@ -1094,19 +1149,77 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
     .ticker-track { animation: none !important; }
 }
 
-/* Las sidebars solo caben cómodas con bastante ancho disponible */
+/*
+   ---------- Responsive: apilar en vez de ocultar ----------
+   En vez de display:none en los sidebars (lo que perdía contenido),
+   el page-shell pasa a columna y cada bloque ocupa el 100% del ancho,
+   uno debajo del otro: contenido principal primero, luego los sidebars.
+*/
+
 @media (max-width: 1280px) {
-    .sidebar-right { display: none; }
+    .page-shell {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .container {
+        max-width: 100%;
+        order: 1;
+    }
+
+    .sidebar-right {
+        display: block;
+        width: 100%;
+        order: 2;
+    }
+
+    .sidebar-left {
+        order: 3;
+    }
+
+    .search-card {
+        position: static;
+    }
 }
 
 @media (max-width: 1180px) {
-    .sidebar { display: none; }
-    .page-shell { padding: 64px 24px 80px; }
+    .sidebar {
+        display: block;
+        width: 100%;
+        padding-top: 0;
+    }
+
+    .sidebar-left {
+        text-align: left;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+    }
+
+    .sidebar-left .sidebar-group h2 {
+        text-align: left;
+    }
+
+    .sidebar-left .sidebar-links {
+        justify-content: flex-start;
+    }
+
+    .sidebar-left .sidebar-note {
+        text-align: left;
+    }
 }
 
 @media (max-width: 600px) {
     header { padding: 16px 20px; flex-direction: column; align-items: flex-start; gap: 4px; }
-    .page-shell { padding: 44px 20px 60px; }
+    .page-shell { padding: 44px 20px 60px; gap: 28px; }
     h1 { font-size: 27px; }
     .options-row { align-items: flex-start; }
+
+    .search-card {
+        padding: 16px;
+    }
+
+    .search-results {
+        max-height: 320px;
+    }
 }

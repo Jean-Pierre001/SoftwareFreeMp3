@@ -1,4 +1,4 @@
-const { YTDLP_PATH, FFMPEG_PATH, DOWNLOADS_PATH } = require("../config/config.js")
+const { YTDLP_PATH, FFMPEG_PATH, DOWNLOADS_PATH, DENO_PATH } = require("../config/config.js")
 const fs = require("fs")
 
 const inicializarServidorUtil = () => {
@@ -8,6 +8,14 @@ const inicializarServidorUtil = () => {
         process.exit(1);    
     } else {
         console.log("Ruta de yt-dlp.exe:", YTDLP_PATH);
+    }
+
+    if (!fs.existsSync(DENO_PATH)) {
+        console.error("Archivo deno.exe no encontrado. Por favor, asegúrate de tenerlo en la raíz del proyecto.");
+        console.log("DENO_PATH:", DENO_PATH);
+        process.exit(1);    
+    } else {
+        console.log("Ruta de deno.exe:", DENO_PATH);
     }
     
     if (!fs.existsSync(FFMPEG_PATH)) {

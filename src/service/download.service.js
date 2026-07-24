@@ -3,7 +3,7 @@ const { spawn } = require("child_process")
 const { ytDlpProcessUtil } = require("../utils/ytDlpProcessUtil.js")
 const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil.js")
 const { getPreviewStream } = require("../service/songPreview.service.js")
-const { FFMPEG_PATH, DOWNLOADS_PATH, COOKIES_PATH } = require("../config/config.js")
+const { FFMPEG_PATH, DOWNLOADS_PATH, COOKIES_PATH, DENO_PATH } = require("../config/config.js")
 
 const sanitizeName = name => {
     return (name || "download")
@@ -189,8 +189,8 @@ const downloadService = (url, format, start, end, previewId) => {
         ...formatArgs,
         ...trimArgs,
 
-        "--js-runtimes",
-        "node",
+        "--js-runtime",
+        DENO_PATH,
 
         "--cookies",
         COOKIES_PATH,

@@ -34,6 +34,10 @@ if (!fs.existsSync(DOWNLOADS_PATH)) {
     fs.mkdirSync(DOWNLOADS_PATH, { recursive: true })
 }
 
+const DENO_PATH =
+    process.platform === "win32"
+        ? path.join(BASE_PATH, "bin", "deno.exe")
+        : path.join(BASE_PATH, "bin", "deno")
 
 const YTDLP_PATH =
     process.platform === "win32"
@@ -70,6 +74,7 @@ if (process.versions.electron) {
 
 console.log("BASE PATH:", BASE_PATH)
 console.log("YTDLP PATH:", YTDLP_PATH)
+console.log("DENO PATH:", DENO_PATH)
 console.log("FFMPEG PATH:", FFMPEG_PATH)
 
 
@@ -78,5 +83,6 @@ module.exports = {
     YTDLP_PATH,
     FFMPEG_PATH,
     DOWNLOADS_PATH,
-    COOKIES_PATH
+    COOKIES_PATH,
+    DENO_PATH
 }

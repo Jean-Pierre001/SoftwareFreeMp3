@@ -3,7 +3,7 @@ const crypto = require("crypto")
 const fs = require("fs")
 const os = require("os")
 const path = require("path")
-const { YTDLP_PATH, COOKIES_PATH } = require("../config/config.js")
+const { YTDLP_PATH, COOKIES_PATH, DENO_PATH } = require("../config/config.js")
 
 const previewCache = new Map()
 const PREVIEW_TTL = 1000 * 60 * 30
@@ -52,9 +52,9 @@ const startBackgroundDownload = (previewId, url, format) => {
         const ytDlp = spawn(YTDLP_PATH, [
             "--no-playlist",
             "--cookies",
-            "--js-runtimes",
-            "node",
             COOKIES_PATH,
+            "--js-runtime",
+            DENO_PATH,
             "-f",
             getFormatArg(format),
             "-o",
@@ -103,6 +103,8 @@ const songPreviewService = (url, format) => {
         const ytDlp = spawn(YTDLP_PATH, [
             "--dump-single-json",
             "--no-playlist",
+            "--js-runtime",
+            DENO_PATH,
             "--cookies",
             COOKIES_PATH,
             url
