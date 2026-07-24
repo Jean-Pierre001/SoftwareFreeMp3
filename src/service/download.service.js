@@ -189,6 +189,9 @@ const downloadService = (url, format, start, end, previewId) => {
         ...formatArgs,
         ...trimArgs,
 
+        "--js-runtimes",
+        "node",
+
         "--cookies",
         COOKIES_PATH,
 

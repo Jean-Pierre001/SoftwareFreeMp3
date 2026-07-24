@@ -37,6 +37,9 @@ const downloadPlaylistService = (url, limit, format) => {
 
         "--ffmpeg-location", FFMPEG_PATH,
 
+        "--js-runtimes",
+        "node",
+
         "--cookies",
         COOKIES_PATH,
 

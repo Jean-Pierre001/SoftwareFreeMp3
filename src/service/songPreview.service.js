@@ -52,6 +52,8 @@ const startBackgroundDownload = (previewId, url, format) => {
         const ytDlp = spawn(YTDLP_PATH, [
             "--no-playlist",
             "--cookies",
+            "--js-runtimes",
+            "node",
             COOKIES_PATH,
             "-f",
             getFormatArg(format),
