@@ -3,16 +3,24 @@ const fs = require("fs")
 const { FFMPEG_PATH } = require("../config/config.js")
 const { getPreviewStream } = require("../service/songPreview.service")
 
+const { ColorLogs } = require("../utils/colorLogs.util.js")
+
 const previewStreamController = async (req, res) => {
 
     const { previewId } = req.params
+    const timestamp = new Date().toLocaleTimeString()
+
+    console.log(`\n${ColorLogs.gray}[${timestamp}]${ColorLogs.reset} ${ColorLogs.bgBlue}${ColorLogs.black}${ColorLogs.bold} STREAM PREVIEW ${ColorLogs.reset} ${ColorLogs.cyan}${ColorLogs.bold}#${previewId}${ColorLogs.reset} ${ColorLogs.bold}Solicitud de streaming recibida...${ColorLogs.reset}`)
+
     const entry = getPreviewStream(previewId)
 
     if (!entry) {
+        console.error(`${ColorLogs.gray}└── Estado preview:${ColorLogs.reset}  ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} NO ENCONTRADO ${ColorLogs.reset} ${ColorLogs.red}No existe entrada en cache para ID: ${previewId}${ColorLogs.reset}`)
         return res.status(404).end()
     }
 
     if (entry.status === "error") {
+        console.error(`${ColorLogs.gray}└── Estado preview:${ColorLogs.reset}  ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} FALLO ENTRADA ${ColorLogs.reset} ${ColorLogs.red}La preparación previa del audio/video falló.${ColorLogs.reset}`)
         return res.status(500).json({
             success: false,
             message: "Falló la preparación del audio/video"
@@ -21,9 +29,13 @@ const previewStreamController = async (req, res) => {
 
     if (entry.status !== "ready") {
 
+        console.log(`${ColorLogs.gray}├── Estado preview:${ColorLogs.reset}  ${ColorLogs.bgYellow}${ColorLogs.black}${ColorLogs.bold} ESPERANDO ${ColorLogs.reset} ${ColorLogs.yellow}Esperando que el stream esté listo...${ColorLogs.reset}`)
+
         try {
             await entry.readyPromise
+            console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.green}Stream ahora está listo.${ColorLogs.reset}`)
         } catch (err) {
+            console.error(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} ERROR PROCESO ${ColorLogs.reset} ${ColorLogs.red}Error en la promesa de lectura: ${err.message}${ColorLogs.reset}`)
             return res.status(500).json({
                 success: false,
                 message: err.message
@@ -33,6 +45,7 @@ const previewStreamController = async (req, res) => {
     }
 
     if (!entry.filePath || !fs.existsSync(entry.filePath)) {
+        console.error(`${ColorLogs.gray}└── Archivo físico:${ColorLogs.reset}  ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} NO EXISTE ${ColorLogs.reset} ${ColorLogs.red}La ruta ${entry.filePath || 'nula'} no existe en disco.${ColorLogs.reset}`)
         return res.status(500).end()
     }
 
@@ -48,6 +61,10 @@ const previewStreamController = async (req, res) => {
     end = Math.min(end, duration)
 
     const clipDuration = Math.max(0.5, end - start)
+
+    console.log(`${ColorLogs.gray}┌── Archivo origen:${ColorLogs.reset} ${ColorLogs.cyan}${filePath}${ColorLogs.reset}`)
+    console.log(`${ColorLogs.gray}├── Formato:${ColorLogs.reset}        ${ColorLogs.magenta}${format}${ColorLogs.reset}`)
+    console.log(`${ColorLogs.gray}├── Recorte:${ColorLogs.reset}        ${ColorLogs.yellow}${start.toFixed(1)}s ➔ ${end.toFixed(1)}s${ColorLogs.reset} ${ColorLogs.gray}(Duración: ${clipDuration.toFixed(1)}s)${ColorLogs.reset}`)
 
     res.setHeader(
         "Content-Type",
@@ -96,6 +113,8 @@ const previewStreamController = async (req, res) => {
 
     ffmpegArgs.push("pipe:1")
 
+    console.log(`${ColorLogs.gray}└── Tubería Stream:${ColorLogs.reset} ${ColorLogs.blue}${ColorLogs.bold}FFmpeg pipe:1${ColorLogs.reset} ${ColorLogs.gray}(Servidor ➔ Cliente)${ColorLogs.reset}`)
+
     const ffmpeg = spawn(
         FFMPEG_PATH,
         ffmpegArgs
@@ -112,7 +131,7 @@ const previewStreamController = async (req, res) => {
             !log.includes("time=") &&
             !log.includes("speed=")
         ) {
-            console.error("ffmpeg:", log)
+            console.error(`${ColorLogs.gray}[FFMPEG STREAM #${previewId}]${ColorLogs.reset} ${ColorLogs.gray}${log.trim()}${ColorLogs.reset}`)
         }
 
     })
@@ -120,12 +139,17 @@ const previewStreamController = async (req, res) => {
     req.on("close", () => {
 
         if (!res.writableEnded) {
+            console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgYellow}${ColorLogs.black}${ColorLogs.bold} CANCELADO ${ColorLogs.reset} ${ColorLogs.yellow}Cliente cerró la conexión. Matando proceso FFmpeg...${ColorLogs.reset}`)
             ffmpeg.kill("SIGKILL")
+        } else {
+            console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgGreen}${ColorLogs.black}${ColorLogs.bold} COMPLETADO ${ColorLogs.reset} ${ColorLogs.green}Stream finalizado y enviado exitosamente.${ColorLogs.reset}`)
         }
 
     })
 
-    ffmpeg.on("error", () => {
+    ffmpeg.on("error", (err) => {
+
+        console.error(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} ERROR FFMPEG ${ColorLogs.reset} ${ColorLogs.red}Error en el proceso de streaming: ${err?.message || 'Error desconocido'}${ColorLogs.reset}`)
 
         if (!res.headersSent) {
             res.status(500).end()

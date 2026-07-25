@@ -26,8 +26,6 @@ if (process.versions.electron) {
 
 }
 
-
-
 const DOWNLOADS_PATH = path.join(BASE_PATH, "tempDownloads")
 
 if (!fs.existsSync(DOWNLOADS_PATH)) {
@@ -70,13 +68,6 @@ if (process.versions.electron) {
     FFMPEG_PATH = ffmpegStatic
 
 }
-
-
-console.log("BASE PATH:", BASE_PATH)
-console.log("YTDLP PATH:", YTDLP_PATH)
-console.log("DENO PATH:", DENO_PATH)
-console.log("FFMPEG PATH:", FFMPEG_PATH)
-
 
 module.exports = {
     PORT,

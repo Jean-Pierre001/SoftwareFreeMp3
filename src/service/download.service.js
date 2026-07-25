@@ -5,6 +5,8 @@ const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil.js")
 const { getPreviewStream } = require("../service/songPreview.service.js")
 const { FFMPEG_PATH, DOWNLOADS_PATH, COOKIES_PATH, DENO_PATH } = require("../config/config.js")
 
+const { ColorLogs } = require("../utils/colorLogs.util.js")
+
 const sanitizeName = name => {
     return (name || "download")
         .replace(/[<>:"/\\|?*]/g, "")
@@ -14,6 +16,14 @@ const sanitizeName = name => {
 const downloadService = (url, format, start, end, previewId) => {
 
     const downloadId = Date.now().toString()
+    const timestamp = new Date().toLocaleTimeString()
+
+    console.log(`${ColorLogs.gray}[${timestamp}]${ColorLogs.reset} ${ColorLogs.bgBlue}${ColorLogs.black}${ColorLogs.bold} TAREA ${ColorLogs.reset} ${ColorLogs.cyan}${ColorLogs.bold}#${downloadId}${ColorLogs.reset} ${ColorLogs.bold}Iniciando descarga...${ColorLogs.reset}`)
+    console.log(`${ColorLogs.gray}┌── URL destino:${ColorLogs.reset} ${ColorLogs.blue}${url}${ColorLogs.reset}`)
+    console.log(`${ColorLogs.gray}├── Formato:${ColorLogs.reset}     ${ColorLogs.magenta}${format}${ColorLogs.reset}`)
+    if (start || end) {
+        console.log(`${ColorLogs.gray}├── Recorte:${ColorLogs.reset}     ${ColorLogs.yellow}${start || '0'}s ➔ ${end || 'fin'}s${ColorLogs.reset}`)
+    }
 
     let fileName = "download"
 
@@ -37,6 +47,9 @@ const downloadService = (url, format, start, end, previewId) => {
         const preview = getPreviewStream(previewId)
 
         if (preview && preview.status === "ready" && preview.filePath) {
+
+            console.log(`${ColorLogs.gray}├── Estrategia:${ColorLogs.reset}  ${ColorLogs.bgGreen}${ColorLogs.black}${ColorLogs.bold} PREVIEW CACHE HIT ${ColorLogs.reset} ${ColorLogs.gray}(usando flujo existente)${ColorLogs.reset}`)
+            console.log(`${ColorLogs.gray}└── Salida:${ColorLogs.reset}      ${ColorLogs.cyan}${outputPath}${ColorLogs.reset}`)
 
             const ffmpegArgs = [
                 "-i",
@@ -77,6 +90,8 @@ const downloadService = (url, format, start, end, previewId) => {
 
             ffmpegArgs.push(outputPath)
 
+            console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.yellow}${ColorLogs.bold}FFmpeg${ColorLogs.reset} Proceso iniciado para conversión desde preview...`)
+
             const ffmpeg = spawn(
                 FFMPEG_PATH,
                 ffmpegArgs
@@ -95,7 +110,7 @@ const downloadService = (url, format, start, end, previewId) => {
                 const text = d.toString()
 
                 if (!text.includes("time=")) {
-                    console.log("[FFMPEG]", text)
+                    console.log(`${ColorLogs.gray}[FFMPEG #${downloadId}]${ColorLogs.reset} ${text.trim()}`)
                 }
 
             })
@@ -106,6 +121,9 @@ const downloadService = (url, format, start, end, previewId) => {
 
                 if (code === 0) {
 
+                    console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgGreen}${ColorLogs.black}${ColorLogs.bold} ÉXITO ${ColorLogs.reset} ${ColorLogs.green}${ColorLogs.bold}¡Tarea #${downloadId} completada correctamente!${ColorLogs.reset}`)
+                    console.log(`${ColorLogs.gray}└── Guardado en:${ColorLogs.reset} ${ColorLogs.green}${outputPath}${ColorLogs.reset}`)
+
                     activeDownloadsUtil.set(downloadId, {
                         ...state,
                         status: "completed",
@@ -113,6 +131,8 @@ const downloadService = (url, format, start, end, previewId) => {
                     })
 
                 } else {
+
+                    console.error(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} ERROR ${ColorLogs.reset} ${ColorLogs.red}${ColorLogs.bold}Proceso FFmpeg falló para la Tarea #${downloadId} (Código: ${code})${ColorLogs.reset}`)
 
                     activeDownloadsUtil.set(downloadId, {
                         ...state,
@@ -124,6 +144,8 @@ const downloadService = (url, format, start, end, previewId) => {
             })
 
             ffmpeg.on("error", err => {
+
+                console.error(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgRed}${ColorLogs.white}${ColorLogs.bold} CRÍTICO ${ColorLogs.reset} ${ColorLogs.red}${ColorLogs.bold}Error al iniciar FFmpeg en Tarea #${downloadId}: ${err.message}${ColorLogs.reset}`)
 
                 activeDownloadsUtil.set(downloadId, {
                     ...activeDownloadsUtil.get(downloadId),
@@ -139,6 +161,7 @@ const downloadService = (url, format, start, end, previewId) => {
 
     }
 
+    console.log(`${ColorLogs.gray}├── Estrategia:${ColorLogs.reset}  ${ColorLogs.bgYellow}${ColorLogs.black}${ColorLogs.bold} DESCARGA DIRECTA ${ColorLogs.reset} ${ColorLogs.gray}(vía yt-dlp)${ColorLogs.reset}`)
 
     let formatArgs = []
 
@@ -183,6 +206,8 @@ const downloadService = (url, format, start, end, previewId) => {
         `[${downloadId}]-%(title)s.%(ext)s`
     )
 
+    console.log(`${ColorLogs.gray}└── Plantilla:${ColorLogs.reset}   ${ColorLogs.cyan}${outputTemplate}${ColorLogs.reset}`)
+
     const args = [
         url,
 
@@ -220,6 +245,8 @@ const downloadService = (url, format, start, end, previewId) => {
         outputTemplate
     ]
 
+    console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.cyan}${ColorLogs.bold}yt-dlp${ColorLogs.reset} Delegando ejecución para la Tarea #${downloadId}...`)
+
     ytDlpProcessUtil(
         downloadId,
         args,
@@ -231,5 +258,6 @@ const downloadService = (url, format, start, end, previewId) => {
 }
 
 module.exports = {
-    downloadService
+    downloadService,
+    ColorLogs
 }
