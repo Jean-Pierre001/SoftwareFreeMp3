@@ -3,19 +3,19 @@ const { YTDLP_PATH } = require("../config/config.js")
 
 const searchSongService = (query) => {
 
-    return new Promise((resolve, reject) => {
+    if (!query) {
+        throw new Error("No se recibió ninguna búsqueda")
+    }
 
-        if (!query) {
-            return reject(new Error("No se recibió ninguna búsqueda"))
-        }
+    const args = [
+        "--dump-single-json",
+        "--no-playlist",
+        `ytsearch6:${query}`
+    ]
 
-        const args = [
-            "--dump-single-json",
-            "--no-playlist",
-            `ytsearch6:${query}`
-        ]
+    const ytDlp = spawn(YTDLP_PATH, args)
 
-        const ytDlp = spawn(YTDLP_PATH, args)
+    const promise = new Promise((resolve, reject) => {
 
         let stdout = ""
         let stderr = ""
@@ -28,9 +28,7 @@ const searchSongService = (query) => {
             stderr += data.toString()
         })
 
-        ytDlp.on("error", err => {
-            reject(err)
-        })
+        ytDlp.on("error", reject)
 
         ytDlp.on("close", code => {
 
@@ -42,18 +40,18 @@ const searchSongService = (query) => {
 
                 const json = JSON.parse(stdout)
 
-                const results = (json.entries || []).map(video => ({
-                    id: video.id,
-                    title: video.title,
-                    url: video.webpage_url,
-                    duration: video.duration,
-                    thumbnail: video.thumbnail,
-                    channel: video.channel,
-                    uploader: video.uploader,
-                    views: video.view_count
-                }))
-
-                resolve(results)
+                resolve(
+                    (json.entries || []).map(video => ({
+                        id: video.id,
+                        title: video.title,
+                        url: video.webpage_url,
+                        duration: video.duration,
+                        thumbnail: video.thumbnail,
+                        channel: video.channel,
+                        uploader: video.uploader,
+                        views: video.view_count
+                    }))
+                )
 
             } catch (err) {
                 reject(err)
@@ -62,6 +60,11 @@ const searchSongService = (query) => {
         })
 
     })
+
+    return {
+        process: ytDlp,
+        promise
+    }
 
 }
 

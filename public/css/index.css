@@ -242,6 +242,24 @@ h1 {
 .search-btn:active { transform: scale(0.97); }
 .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.search-cancel-btn {
+    flex-shrink: 0;
+    padding: 11px 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--danger);
+    color: var(--surface-deep);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.search-cancel-btn:hover { background-color: var(--accent); color: #0c0b0a; }
+.search-cancel-btn:active { transform: scale(0.97); }
+.search-cancel-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .search-status {
     display: none;
     align-items: center;
@@ -390,6 +408,37 @@ input[type="number"]:focus {
 .field-url input {
     font-size: 14.5px;
 }
+
+/* ---------- Fila del input de URL + botón cancelar ---------- */
+
+.url-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.url-input-row .urlInput {
+    flex: 1;
+    min-width: 0;
+}
+
+.cancel-download-btn {
+    flex-shrink: 0;
+    padding: 13px 16px;
+    border-radius: var(--radius);
+    border: none;
+    background-color: var(--danger);
+    color: var(--surface-deep);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.cancel-download-btn:hover { background-color: var(--accent); color: #0a0a0c; }
+.cancel-download-btn:active { transform: scale(0.97); }
+.cancel-download-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ---------- Fila de opciones: formato + playlist ---------- */
 

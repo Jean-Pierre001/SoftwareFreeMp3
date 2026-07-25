@@ -1,6 +1,10 @@
+const crypto = require("crypto")
 const { searchSongService } = require("../service/searchSong.service")
+const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil")
 
 const searchSongController = async (req, res) => {
+
+    let searchId
 
     try {
 
@@ -13,15 +17,28 @@ const searchSongController = async (req, res) => {
             })
         }
 
-        const results = await searchSongService(query)
+        searchId = crypto.randomUUID()
+
+        const { process, promise } = searchSongService(query)
+
+        activeDownloadsUtil.set(searchId, process)
+
+        const results = await promise
+
+        activeDownloadsUtil.delete(searchId)
 
         res.json({
             success: true,
+            searchId,
             total: results.length,
             results
         })
 
     } catch (err) {
+
+        if (searchId) {
+            activeDownloadsUtil.delete(searchId)
+        }
 
         console.error(err)
 

@@ -42,6 +42,7 @@ export const searchQueryInput = document.getElementById("searchQuery");
 export const searchBtn = document.getElementById("searchBtn");
 export const searchStatus = document.getElementById("searchStatus");
 export const searchResults = document.getElementById("searchResults");
+export const cancelSearchBtn = document.getElementById("cancelSearchBtn")
 
 export const modal = document.getElementById("update-modal");
 export const progressBar = document.getElementById("progress-bar");

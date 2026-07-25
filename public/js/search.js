@@ -1,6 +1,9 @@
 // ---------- Buscador de música (yt-dlp) ----------
 
-import { urlInput, searchForm, searchQueryInput, searchBtn, searchStatus, searchResults } from "./dom.js";
+import { urlInput, searchForm, searchQueryInput, searchBtn, searchStatus, searchResults, cancelSearchBtn } from "./dom.js";
+
+let currentSearchId = null;
+let currentSearchController = null;
 
 function formatDuration(seconds) {
     if (seconds === null || seconds === undefined || Number.isNaN(seconds)) return "";
@@ -25,11 +28,13 @@ function escapeHtml(str) {
 
 function setSearchStatus(text, variant) {
     searchResults.innerHTML = "";
+
     if (!text) {
         searchStatus.className = "search-status";
         searchStatus.textContent = "";
         return;
     }
+
     searchStatus.className = `search-status active${variant ? ` ${variant}` : ""}`;
     searchStatus.textContent = text;
 }
@@ -91,7 +96,36 @@ searchForm.addEventListener("submit", async (e) => {
         return;
     }
 
-    searchBtn.disabled = true;
+    // Cancelar el fetch anterior
+    if (currentSearchController) {
+        currentSearchController.abort();
+    }
+
+    // Cancelar la búsqueda anterior en el backend
+    if (currentSearchId) {
+
+        try {
+
+            await fetch("/api/search/cancel", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    searchId: currentSearchId
+                })
+            });
+
+        } catch {}
+
+        currentSearchId = null;
+
+    }
+
+    currentSearchController = new AbortController();
+
+    searchBtn.hidden = true;
+    cancelSearchBtn.hidden = false
     setSearchStatus("Buscando...", "loading");
 
     try {
@@ -101,32 +135,73 @@ searchForm.addEventListener("submit", async (e) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ query })
+            body: JSON.stringify({ query }),
+            signal: currentSearchController.signal
         });
 
         const data = await response.json();
 
-        if (!response.ok || data.error) {
-            throw new Error(data.error || "No se pudo realizar la búsqueda.");
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "No se pudo realizar la búsqueda.");
         }
 
-        const results = Array.isArray(data) ? data : (data.results || []);
+        currentSearchId = data.searchId;
 
-        if (!results.length) {
+        if (!data.results.length) {
             setSearchStatus("No se encontraron resultados.", "empty");
             return;
         }
 
-        renderSearchResults(results);
+        renderSearchResults(data.results);
 
     } catch (err) {
+
+        if (err.name === "AbortError") {
+            return;
+        }
 
         setSearchStatus(err.message || "No se pudo conectar con el servidor.", "error");
 
     } finally {
 
-        searchBtn.disabled = false;
-
+        currentSearchController = null;
+        currentSearchId = null;
+        searchBtn.hidden = false;
+        cancelSearchBtn.hidden = true
     }
 
 });
+
+cancelSearchBtn.addEventListener("click", async () => {
+
+    if (currentSearchController) {
+        currentSearchController.abort()
+    }
+
+    if (currentSearchId) {
+
+        try {
+
+            await fetch("/api/search/cancel", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    searchId: currentSearchId
+                })
+            })
+
+        } catch {}
+
+    }
+
+    currentSearchController = null
+    currentSearchId = null
+
+    searchBtn.hidden = false
+    cancelSearchBtn.hidden = true
+
+    setSearchStatus("Búsqueda cancelada.", "empty")
+
+})
