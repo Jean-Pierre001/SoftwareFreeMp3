@@ -7,7 +7,7 @@ const cancelDownloadController = (req, res) => {
     if (!downloadId) {
         return res.status(400).json({
             success: false,
-            message: "Debe enviar un downloadId"
+            message: "Debe enviar un downloadId."
         })
     }
 
@@ -16,20 +16,52 @@ const cancelDownloadController = (req, res) => {
     if (!download) {
         return res.status(404).json({
             success: false,
-            message: "La descarga no existe o ya finalizó"
+            message: "La descarga no existe o ya finalizó."
         })
     }
 
-    download.process.kill()
+    const { process, status } = download
 
-    activeDownloadsUtil.set(downloadId, {
-        ...download,
-        status: "cancelled"
-    })
+    if (!process) {
+        return res.status(409).json({
+            success: false,
+            message: "La descarga no puede cancelarse."
+        })
+    }
 
-    res.json({
-        success: true
-    })
+    if (["completed", "error", "cancelled"].includes(status)) {
+        return res.status(409).json({
+            success: false,
+            message: `La descarga ya se encuentra ${status}.`
+        })
+    }
+
+    try {
+
+        const killed = process.kill()
+
+        if (!killed) {
+            return res.status(500).json({
+                success: false,
+                message: "No fue posible cancelar la descarga."
+            })
+        }
+
+        res.json({
+            success: true,
+            message: "Solicitud de cancelación enviada correctamente."
+        })
+
+    } catch (err) {
+
+        console.error(err)
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+
+    }
 
 }
 

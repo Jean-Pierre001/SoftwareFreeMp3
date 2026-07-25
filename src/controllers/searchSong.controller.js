@@ -1,6 +1,7 @@
 const crypto = require("crypto")
 const { searchSongService } = require("../service/searchSong.service")
 const { activeDownloadsUtil } = require("../utils/activeDownloadsUtil")
+const { saveSearchHistory } = require("../service/searchHistory.service")
 
 const searchSongController = async (req, res) => {
 
@@ -24,6 +25,8 @@ const searchSongController = async (req, res) => {
         activeDownloadsUtil.set(searchId, process)
 
         const results = await promise
+
+        saveSearchHistory(query, results)
 
         activeDownloadsUtil.delete(searchId)
 

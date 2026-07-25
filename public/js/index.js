@@ -8,6 +8,7 @@ import "./format-selector.js";
 import "./playlist-toggle.js";
 import "./placeholder.js";
 import "./search.js";
+import "./history.js";
 import "./download-form.js";
 import "./updater.js";
 import "./youtube-auth.js";

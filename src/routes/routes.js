@@ -10,6 +10,7 @@ const { previewStreamController } = require("../controllers/previewStream.contro
 const { youtubeStatusController } = require("../controllers/youtubeStatus.controller")
 const { cancelSearchController } = require("../controllers/cancelSearch.controller")
 const { cancelDownloadController } = require("../controllers/cancelDownload.controller")
+const { searchHistoryController } = require("../controllers/searchHistory.controller")
 
 router.get("/", indexController)
 router.post("/api/download", downloadController)
@@ -18,6 +19,8 @@ router.get("/api/progress/:id", channelSSEController)
 router.get("/api/get-file/:id", getFileController)
 router.get("/api/youtube-status", youtubeStatusController)
 
+//---- Rutas de historial ----//
+router.get("/api/search/history", searchHistoryController)
 
 //---- Rutas de previsualizacion ----//
 router.post("/api/preview", songPreviewController)
@@ -26,6 +29,5 @@ router.get("/api/preview-stream/:previewId", previewStreamController)
 //---- Rutas de busqueda ----//
 router.post("/api/search", searchSongController)
 router.post("/api/search/cancel", cancelSearchController)
-
 
 module.exports = router

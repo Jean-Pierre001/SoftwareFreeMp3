@@ -39,6 +39,9 @@ function setSearchStatus(text, variant) {
     searchStatus.textContent = text;
 }
 
+// Cada canción se muestra como una entrada individual y detallada:
+// thumbnail 16:9 con la duración superpuesta, título completo (hasta 2 líneas),
+// canal y vistas debajo.
 function renderSearchResults(results) {
 
     searchStatus.className = "search-status";
@@ -51,17 +54,23 @@ function renderSearchResults(results) {
         card.type = "button";
         card.className = "search-result";
 
-        const metaParts = [
-            item.channel || item.uploader || "",
-            formatDuration(item.duration),
-            formatViews(item.views)
-        ].filter(Boolean);
+        const duration = formatDuration(item.duration);
+        const views = formatViews(item.views);
+        const channel = item.channel || item.uploader || "";
+
+        const statsParts = [channel, views].filter(Boolean);
+        const statsHtml = statsParts
+            .map(part => `<span>${escapeHtml(part)}</span>`)
+            .join('<span class="stat-dot">·</span>');
 
         card.innerHTML = `
-            <img class="search-result-thumb" src="${item.thumbnail || ""}" alt="">
+            <div class="search-result-thumb-wrap">
+                <img class="search-result-thumb" src="${item.thumbnail || ""}" alt="">
+                ${duration ? `<span class="search-result-duration">${duration}</span>` : ""}
+            </div>
             <div class="search-result-text">
                 <div class="search-result-title">${escapeHtml(item.title || "Sin título")}</div>
-                <div class="search-result-meta">${escapeHtml(metaParts.join(" · "))}</div>
+                <div class="search-result-stats">${statsHtml}</div>
             </div>
         `;
 
@@ -154,6 +163,9 @@ searchForm.addEventListener("submit", async (e) => {
 
         renderSearchResults(data.results);
 
+        // Avisar al panel de historial que hay una búsqueda nueva para refrescar
+        window.dispatchEvent(new CustomEvent("search:completed"));
+
     } catch (err) {
 
         if (err.name === "AbortError") {
@@ -205,3 +217,8 @@ cancelSearchBtn.addEventListener("click", async () => {
     setSearchStatus("Búsqueda cancelada.", "empty")
 
 })
+
+// Al elegir un item del historial, reutiliza sus resultados sin re-buscar
+window.addEventListener("history:selected", (e) => {
+    renderSearchResults(e.detail.results || []);
+});
