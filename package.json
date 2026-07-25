@@ -1,6 +1,6 @@
 {
   "name": "softwarefreemp3",
-  "version": "2.7.15",
+  "version": "2.8.16",
   "description": "Aplicacion de escritorio para descargar de multimedia de paginas webs como youtube",
   "main": "electron/main.js",
   "scripts": {

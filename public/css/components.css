@@ -567,7 +567,7 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
     max-width: 140px;
 }
 
-/* ---------- Panel Recorte y Reproductor ---------- */
+/* ---------- Panel Recorte (estados base) ---------- */
 
 .trim-panel .trim-inner {
     background: var(--surface);
@@ -657,67 +657,292 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
     text-overflow: ellipsis;
 }
 
-.trim-preview-row {
+/* ==========================================================
+   Reproductor de recorte (trim-player)
+   ========================================================== */
+
+.trim-player {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    flex-direction: column;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #000;
+    margin-bottom: 14px;
 }
 
-.trim-play-btn {
-    width: 34px;
-    height: 34px;
+/* ---------- Escenario (video / audio) ---------- */
+
+.trim-player-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Cuando el formato es audio, el escenario colapsa a una franja delgada
+   con la miniatura de fondo en vez de ocupar 16:9 completo */
+.trim-player-stage.audio-mode {
+    aspect-ratio: unset;
+    height: 96px;
+}
+
+.trim-stage-media {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    display: none;
+}
+
+.trim-player-poster {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.55);
+    transition: opacity 0.2s ease;
+}
+
+.trim-player-poster img {
+    display: none; /* la imagen sólo se usa como fuente para el fondo via JS */
+}
+
+.trim-player-stage.is-active .trim-player-poster {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.trim-player-bigplay {
+    position: absolute;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--accent);
+    border: none;
+    background: rgba(255, 255, 255, 0.94);
     color: #0a0a0c;
-    font-size: 13px;
+    font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    flex-shrink: 0;
-    transition: transform 0.1s ease, background-color 0.15s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transition: transform 0.12s ease, opacity 0.15s ease, background-color 0.15s ease;
 }
 
-.trim-play-btn:hover { background: var(--accent-strong); }
-.trim-play-btn:active { transform: scale(0.92); }
+.trim-player-bigplay:hover { background: var(--accent); transform: scale(1.05); }
+.trim-player-bigplay:active { transform: scale(0.95); }
 
-.trim-play-label {
-    font-size: 12.5px;
-    color: var(--text-muted);
-}
+.trim-player-stage.is-active .trim-player-bigplay { opacity: 0; pointer-events: none; }
+.trim-player-stage.is-buffering .trim-player-bigplay { opacity: 0; pointer-events: none; }
 
-.trim-play-btn:disabled {
-    cursor: wait;
-    opacity: 0.8;
-}
+.trim-bigplay-spinner { display: none; }
 
-.trim-play-btn .btn-spinner {
-    display: none;
-    width: 13px;
-    height: 13px;
+.trim-player-bigplay.loading #trimBigPlayIcon { display: none; }
+.trim-player-bigplay.loading .trim-bigplay-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     border: 2px solid rgba(10, 10, 12, 0.25);
     border-top-color: #0a0a0c;
     animation: spin 0.7s linear infinite;
 }
 
-.trim-play-btn.loading #trimPlayIcon { display: none; }
-.trim-play-btn.loading .btn-spinner { display: inline-block; }
-
-#trimAudio { display: none; }
-
-#trimVideo {
+.trim-player-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     display: none;
-    width: 100%;
-    max-height: 220px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    background: #000;
+    align-items: center;
+    gap: 6px;
 }
 
-/* ---------- Slider Doble ---------- */
+.trim-player-stage.is-buffering .trim-player-badge { display: flex; }
+
+/* ---------- Barra de controles ---------- */
+
+.trim-player-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: var(--surface-deep);
+    border-top: 1px solid var(--border);
+}
+
+.trim-ctrl-btn {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.trim-ctrl-btn:hover { background: var(--surface-raised); color: var(--text); }
+.trim-ctrl-btn:active { transform: scale(0.94); }
+
+.trim-ctrl-btn .btn-spinner { display: none; }
+.trim-ctrl-btn.loading #trimPlayIcon { display: none; }
+.trim-ctrl-btn.loading .btn-spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+}
+
+.trim-ctrl-time {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-muted);
+    min-width: 38px;
+    text-align: center;
+}
+
+/* Barra de progreso de reproducción */
+
+.trim-seek-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 22px;
+    display: flex;
+    align-items: center;
+}
+
+.trim-seek-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 4px;
+    transform: translateY(-50%);
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.trim-seek-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+.trim-seek-handle {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 2px solid var(--accent);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+}
+
+.trim-seek-input {
+    position: relative;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.trim-seek-input::-webkit-slider-runnable-track { background: transparent; height: 22px; }
+.trim-seek-input::-moz-range-track { background: transparent; height: 22px; border: none; }
+.trim-seek-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: transparent;
+    cursor: grab;
+}
+.trim-seek-input::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: grab;
+}
+
+/* Volumen */
+
+.trim-volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.trim-volume-input {
+    width: 60px;
+    height: 4px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+/* Velocidad */
+
+.trim-speed-select {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.trim-speed-select:hover { color: var(--text); }
+.trim-speed-select:focus-visible { outline: none; border-color: var(--accent); }
+
+/* Ocultar controles que no aplican al formato actual */
+
+.trim-player.audio-format .trim-ctrl-btn[data-fullscreen-only] { display: none; }
+
+/* Fullscreen: cuando el video real entra en fullscreen, ocupa toda la pantalla
+   con el fondo negro nativo; no se requiere CSS extra salvo asegurar contain */
+.trim-stage-media:fullscreen { object-fit: contain; background: #000; }
+
+/* ---------- Slider de recorte (inicio/fin) + playhead ---------- */
 
 .trim-slider-wrap {
     position: relative;
@@ -743,6 +968,20 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
     background: var(--accent);
     border-radius: 2px;
 }
+
+.trim-playhead {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 12px;
+    background: #fff;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    display: none;
+}
+
+.trim-playhead.active { display: block; }
 
 .trim-range-input {
     position: absolute;
@@ -802,6 +1041,40 @@ button.startBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 #trimEnd { z-index: 2; }
+
+/* ---------- Acciones rápidas de marcado ---------- */
+
+.trim-quick-actions {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 2px;
+}
+
+.trim-quick-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.trim-quick-btn:hover:not(:disabled) {
+    background: var(--surface-raised);
+    color: var(--text);
+    border-color: var(--accent-strong);
+}
+
+.trim-quick-btn:active:not(:disabled) { transform: scale(0.98); }
+
+.trim-quick-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- Tiempos de inicio/fin ---------- */
 
 .trim-times {
     display: flex;

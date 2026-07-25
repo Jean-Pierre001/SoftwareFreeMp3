@@ -53,18 +53,19 @@ const previewStreamController = async (req, res) => {
 
     let start = Number(req.query.start)
     let end = Number(req.query.end)
+    let seek = Number(req.query.seek) || 0 // <--- CAPTURAMOS EL SEEK DEL REPRODUCTOR
 
     if (Number.isNaN(start) || start < 0) start = 0
     if (Number.isNaN(end) || end <= start) end = duration
+    if (Number.isNaN(seek) || seek < 0) seek = 0
 
-    start = Math.min(start, duration)
-    end = Math.min(end, duration)
-
-    const clipDuration = Math.max(0.5, end - start)
+    // El punto real de corte en el archivo físico es start + seek
+    const realStart = Math.min(start + seek, duration)
+    const clipDuration = Math.max(0.5, end - realStart)
 
     console.log(`${ColorLogs.gray}┌── Archivo origen:${ColorLogs.reset} ${ColorLogs.cyan}${filePath}${ColorLogs.reset}`)
     console.log(`${ColorLogs.gray}├── Formato:${ColorLogs.reset}        ${ColorLogs.magenta}${format}${ColorLogs.reset}`)
-    console.log(`${ColorLogs.gray}├── Recorte:${ColorLogs.reset}        ${ColorLogs.yellow}${start.toFixed(1)}s ➔ ${end.toFixed(1)}s${ColorLogs.reset} ${ColorLogs.gray}(Duración: ${clipDuration.toFixed(1)}s)${ColorLogs.reset}`)
+    console.log(`${ColorLogs.gray}├── Recorte real:${ColorLogs.reset}   ${ColorLogs.yellow}${realStart.toFixed(1)}s ➔ ${end.toFixed(1)}s${ColorLogs.reset} ${ColorLogs.gray}(Offset Seek: ${seek.toFixed(1)}s | Duración Restante: ${clipDuration.toFixed(1)}s)${ColorLogs.reset}`)
 
     res.setHeader(
         "Content-Type",
@@ -75,7 +76,7 @@ const previewStreamController = async (req, res) => {
 
     const ffmpegArgs = [
         "-ss",
-        String(start),
+        String(realStart), // <--- FFmpeg arranca directo en el seek indicado
         "-i",
         filePath,
         "-t",
@@ -90,9 +91,9 @@ const previewStreamController = async (req, res) => {
             "-c:a",
             "aac",
             "-preset",
-            "veryfast",
+            "ultrafast", // Preset ultra rápido para menor latencia al hacer seek
             "-movflags",
-            "frag_keyframe+empty_moov",
+            "frag_keyframe+empty_moov+default_base_moof", // Flags para streaming MP4 fluido en HTML5
             "-f",
             "mp4"
         )
@@ -137,14 +138,9 @@ const previewStreamController = async (req, res) => {
     })
 
     req.on("close", () => {
-
-        if (!res.writableEnded) {
-            console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgYellow}${ColorLogs.black}${ColorLogs.bold} CANCELADO ${ColorLogs.reset} ${ColorLogs.yellow}Cliente cerró la conexión. Matando proceso FFmpeg...${ColorLogs.reset}`)
+        if (!ffmpeg.killed) {
             ffmpeg.kill("SIGKILL")
-        } else {
-            console.log(`${ColorLogs.gray}[${new Date().toLocaleTimeString()}]${ColorLogs.reset} ${ColorLogs.bgGreen}${ColorLogs.black}${ColorLogs.bold} COMPLETADO ${ColorLogs.reset} ${ColorLogs.green}Stream finalizado y enviado exitosamente.${ColorLogs.reset}`)
         }
-
     })
 
     ffmpeg.on("error", (err) => {

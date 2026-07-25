@@ -189,23 +189,80 @@
                             </div>
                         </div>
 
-                        <div class="trim-preview-row">
-                            <button type="button" class="trim-play-btn" id="trimPlayBtn" aria-label="Reproducir selección">
-                                <span id="trimPlayIcon">▶</span>
-                                <span class="btn-spinner" aria-hidden="true"></span>
-                            </button>
-                            <span class="trim-play-label" id="trimPlayLabel">Escuchar el recorte seleccionado</span>
+                        <!-- ---------- Reproductor completo ---------- -->
+                        <div class="trim-player" id="trimPlayer">
+
+                            <div class="trim-player-stage" id="trimPlayerStage">
+
+                                <video id="trimVideo" class="trim-stage-media" preload="none" playsinline></video>
+                                <audio id="trimAudio" preload="none"></audio>
+
+                                <div class="trim-player-poster" id="trimPlayerPoster">
+                                    <img id="trimPosterImg" alt="">
+                                </div>
+
+                                <button type="button" class="trim-player-bigplay" id="trimBigPlayBtn" aria-label="Reproducir el recorte">
+                                    <span id="trimBigPlayIcon">▶</span>
+                                    <span class="btn-spinner trim-bigplay-spinner" aria-hidden="true"></span>
+                                </button>
+
+                                <div class="trim-player-badge" id="trimBufferBadge">Cargando...</div>
+                            </div>
+
+                            <div class="trim-player-bar">
+
+                                <button type="button" class="trim-ctrl-btn" id="trimPlayBtn" aria-label="Reproducir / pausar">
+                                    <span id="trimPlayIcon">▶</span>
+                                    <span class="btn-spinner" aria-hidden="true"></span>
+                                </button>
+
+                                <span class="trim-ctrl-time" id="trimCurrentTimeLabel">00:00</span>
+
+                                <div class="trim-seek-wrap">
+                                    <div class="trim-seek-track">
+                                        <div class="trim-seek-progress" id="trimSeekProgress"></div>
+                                        <div class="trim-seek-handle" id="trimSeekHandle"></div>
+                                    </div>
+                                    <input type="range" id="trimSeekInput" class="trim-seek-input" min="0" max="1000" value="0" step="1" aria-label="Posición de reproducción">
+                                </div>
+
+                                <span class="trim-ctrl-time" id="trimDurationLabel">00:00</span>
+
+                                <div class="trim-volume-wrap">
+                                    <button type="button" class="trim-ctrl-btn trim-mute-btn" id="trimMuteBtn" aria-label="Silenciar">
+                                        <span id="trimVolumeIcon">🔊</span>
+                                    </button>
+                                    <input type="range" id="trimVolumeInput" class="trim-volume-input" min="0" max="1" value="1" step="0.01" aria-label="Volumen">
+                                </div>
+
+                                <select id="trimSpeedSelect" class="trim-speed-select" aria-label="Velocidad de reproducción">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+
+                                <button type="button" class="trim-ctrl-btn" id="trimFullscreenBtn" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>
+
+                            </div>
+
                         </div>
 
-                        <audio id="trimAudio" preload="none"></audio>
-                        <video id="trimVideo" preload="none"></video>
-
+                        <!-- ---------- Slider de recorte con playhead ---------- -->
                         <div class="trim-slider-wrap">
                             <div class="trim-track">
                                 <div class="trim-range" id="trimRange"></div>
+                                <div class="trim-playhead" id="trimPlayhead"></div>
                             </div>
                             <input type="range" id="trimStart" class="trim-range-input" min="0" max="100" value="0" step="1" aria-label="Inicio del recorte">
                             <input type="range" id="trimEnd" class="trim-range-input" min="0" max="100" value="100" step="1" aria-label="Fin del recorte">
+                        </div>
+
+                        <div class="trim-quick-actions">
+                            <button type="button" class="trim-quick-btn" id="trimMarkStartBtn" disabled>⏮ Marcar inicio aquí</button>
+                            <button type="button" class="trim-quick-btn" id="trimMarkEndBtn" disabled>⏭ Marcar fin aquí</button>
                         </div>
 
                         <div class="trim-times">
