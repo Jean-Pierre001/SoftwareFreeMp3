@@ -30,6 +30,7 @@ export const trimRangeFill = document.getElementById("trimRange");
 export const trimStartTime = document.getElementById("trimStartTime");
 export const trimEndTime = document.getElementById("trimEndTime");
 export const trimSelectionLabel = document.getElementById("trimSelectionLabel");
+export const cancelDownloadBtn = document.getElementById("cancelDownloadBtn");
 
 export const trimPlayBtn = document.getElementById("trimPlayBtn");
 export const trimPlayIcon = document.getElementById("trimPlayIcon");

@@ -110,14 +110,19 @@
 
             <div class="field field-url">
                 <label for="url">Enlace</label>
-                <input
-                    type="text"
-                    id="url"
-                    class="urlInput"
-                    autocomplete="off"
-                    spellcheck="false"
-                    required
-                >
+                <div class="url-input-row">
+                    <input
+                        type="text"
+                        id="url"
+                        class="urlInput"
+                        autocomplete="off"
+                        spellcheck="false"
+                        required
+                    >
+                    <button type="button" id="cancelDownloadBtn" class="cancel-download-btn" hidden>
+                        Cancelar
+                    </button>
+                </div>
             </div>
 
             <div class="options-row">
