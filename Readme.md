@@ -1,13 +1,95 @@
-# SoftwareFreeMp3
+# Índice
 
-Aplicación de escritorio y web para descargar y previsualizar contenido multimedia utilizando Node.js, Electron, yt-dlp y FFmpeg.
+- [Instalación para usuarios comunes](#instalación-para-usuarios-comunes)
+- [Aplicación de escritorio (Electron)](#aplicación-de-escritorio-electron)
+- [Versión web / servidor](#versión-web--servidor)
+- [Requisitos previos](#requisitos-previos)
+- [1. Node.js](#1-nodejs)
+- [2. Instalación del proyecto](#2-instalación-del-proyecto)
+- [3. Configuración de yt-dlp](#3-configuración-de-yt-dlp)
+- [4. Configuración de cookies de YouTube](#4-configuración-de-cookies-de-youtube)
+- [5. Ejecutar servidor manualmente](#5-ejecutar-servidor-manualmente)
+- [6. Acceso a la aplicación](#6-acceso-a-la-aplicación)
+- [Sistema de previsualización](#sistema-de-previsualización)
+- [Solución de problemas](#solución-de-problemas)
+- [Tecnologías utilizadas](#tecnologías-utilizadas)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Autor](#autor)
 
-El proyecto permite descargar audio y video mediante una interfaz gráfica utilizando herramientas de código abierto.
+---
 
-Cuenta con dos modos de funcionamiento:
+# Instalación para usuarios comunes
 
-- Aplicación de escritorio mediante Electron.
-- Versión web ejecutando el servidor Node.js directamente.
+Si descargaste la versión de escritorio de **SoftwareFreeMp3**, no necesitas instalar Node.js, FFmpeg ni ninguna otra herramienta adicional.
+
+> **Importante:** Unicamente se encuentra con soporte para windows.
+
+## Pasos
+
+1. Entra a [https://github.com/Jean-Pierre001/SoftwareFreeMp3/releases]
+2. Descarga el **SoftwareFreeMP3-Setup-x.x.xx.exe**
+3. Ejecuta el instalador.
+4. Sigue los pasos del asistente de instalación.
+5. Una vez finalizada la instalación, abre **SoftwareFreeMp3**.
+
+---
+
+## Si Windows muestra una advertencia
+
+Es posible que Windows muestre una advertencia indicando que la aplicación proviene de un editor desconocido.
+
+Si descargaste el programa desde el repositorio oficial:
+
+1. Haz clic en **Más información**.
+2. Selecciona **Ejecutar de todas formas**.
+
+---
+
+## Si el antivirus bloquea la instalación
+
+Algunos antivirus pueden detectar falsos positivos porque la aplicación incluye herramientas como **yt-dlp** y **FFmpeg**.
+
+Si ocurre:
+
+- Comprueba si el antivirus envió archivos a cuarentena.
+- Restaura los archivos eliminados.
+- Agrega la carpeta de instalación a las exclusiones del antivirus.
+- Si es necesario, desactiva temporalmente la protección en tiempo real durante la instalación y vuelve a activarla cuando termine.
+
+> **Importante:** Solo haz esto si descargaste el programa desde una github.
+
+---
+
+## Si el navegador bloquea la descarga
+
+Algunos navegadores pueden bloquear automáticamente archivos `.exe`.
+
+En ese caso:
+
+- Conserva el archivo descargado si el navegador lo permite.
+- Descarga nuevamente el instalador desde la página oficial si fue eliminado.
+- Comprueba que la descarga haya finalizado correctamente.
+
+---
+
+## Problemas durante la instalación
+
+Si el instalador no inicia:
+
+- Ejecuta el instalador como **Administrador**.
+- Reinicia el equipo e inténtalo nuevamente.
+- Comprueba que tengas permisos para instalar aplicaciones.
+- Asegúrate de que ningún antivirus esté bloqueando la ejecución.
+
+> **Nota:** Si sigue sin abrir pruebe reinstalar el programa y recuerda acepta todos los permisos.
+
+---
+
+## Primer inicio
+
+La primera vez que abras la aplicación puede tardar unos segundos mientras inicializa sus componentes internos.
+
+Después de ese primer inicio, la aplicación abrirá normalmente.
 
 ---
 
